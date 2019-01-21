@@ -25,14 +25,33 @@
 //
 
 #include <timer.h>
+#include <syscon.h>
+#include <interrupt.h>
 
 Timer::Callback Timer::_callbacks[4];
+
+void
+Timer::cancel()
+{
+    _regs.TCR = TCR_COUNTERENABLE_DISABLED | TCR_COUNTERRESET_ENABLED;
+    _regs.IR = 0;
+    _regs.MR0 = 0;
+    _regs.MR1 = 0;
+    _regs.MR2 = 0;
+    _regs.MR3 = 0;
+    _regs.CCR = 0;
+    _regs.EMR = 0;
+    _regs.CTCR = 0;
+    _regs.PWMC = 0;
+    _callbacks[_index] = nullptr;
+}
+
 
 void
 Timer::handler(unsigned index)
 {
     if (_callbacks[index] != nullptr) {
-        _callbacks[index]();
+        _callbacks[index](index);
     } else {
         Timer(index).cancel();
     }
@@ -44,3 +63,55 @@ extern "C" {
     void CT32_0_IRQHandler() { Timer::handler(2); }
     void CT32_1_IRQHandler() { Timer::handler(3); }
 }
+
+uint64_t        Timebase::_time;
+
+void
+Timebase::configure()
+{
+    cancel();
+    _time = 0;
+    _regs.CTCR = CTCR_CTMODE_TIMER;
+    _regs.PR = (Syscon::PCLK_FREQ / 1000000) - 1;        // count microseconds
+    _regs.MR0 = 0xffffffff;                              // interrupt around about wrap time
+    _regs.MR1 = 0x8000;                                  // and again at ~halftime for a 16-bit timer
+    _regs.MCR = MCR_MR0_INT_ENABLED | MCR_MR1_INT_ENABLED;
+    _callbacks[_index] = &Timebase::handler;
+    _regs.TCR = TCR_COUNTERENABLE_ENABLED | TCR_COUNTERRESET_DISABLED;
+}
+
+uint64_t
+Timebase::time()
+{
+    BEGIN_CRITICAL_SECTION;
+
+    // clear any match interrupts - we're about to do the same work
+    _regs.IR = _regs.IR;
+
+    // work out whether this is a 16 or 32-bit timer
+    uint64_t mask = _regs.MR0;
+
+    // split the time into bits we own and bits that the timer owns
+    uint32_t old_count = _time & mask;
+    uint64_t tb_high = _time ^ old_count;
+
+    // get the current low bits
+    uint32_t count = _regs.TC;
+
+    // handle possible wrap since the last time we were called
+    if (count < old_count) {
+        tb_high += mask + 1;
+    }
+    _time = tb_high | count;
+
+    return _time;
+
+    END_CRITICAL_SECTION;
+}
+
+void
+Timebase::handler(unsigned index)
+{
+    Timebase(index).time();
+}
+

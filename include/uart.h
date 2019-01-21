@@ -27,6 +27,7 @@
 #pragma once
 
 #include <LPC11xx.h>
+#include <etl/cstring.h>
 #include "_compiler.h"
 #include "syscon.h"
 
@@ -81,6 +82,17 @@ public:
     {
         while (*s != '\0') {
             send(*s++);
+        }
+
+        return *this;
+    }
+
+    const UART &operator << (const etl::istring s) const __always_inline
+    {
+        auto iter = s.begin();
+
+        while (iter != s.end()) {
+            send(*iter++);
         }
 
         return *this;

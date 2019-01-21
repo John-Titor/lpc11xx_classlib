@@ -27,7 +27,7 @@
 #pragma once
 
 #include <LPC11xx.h>
-#include "_compiler.h"
+#include <sys/cdefs.h>
 
 class Pin
 {

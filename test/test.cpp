@@ -16,6 +16,8 @@ callback(void)
 void
 main()
 {
+    Timebase(0).configure();
+
     // SSP
     P0_9_MOSI0.configure();
     SSP0.configure(2400000, 8, 0);

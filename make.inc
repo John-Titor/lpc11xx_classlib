@@ -35,7 +35,9 @@ ASTYLE		 = astyle
 
 # Common compile arguments
 EXTRA_DEPS	+= $(MAKEFILE_LIST)
-INCLUDES	+= $(_LIBDIR)/include $(_LIBDIR)/include/CMSIS
+INCLUDES	+= $(_LIBDIR)/include \
+		   $(_LIBDIR)/include/CMSIS \
+		   $(_LIBDIR)/etl/include
 DEFINES		+= $(CHIP)
 
 # Compiler options

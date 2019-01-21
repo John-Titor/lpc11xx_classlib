@@ -48,6 +48,30 @@ private:
     const IRQn_Type      _vector;
 };
 
+class CriticalSection
+{
+public:
+    CriticalSection() :
+        _enabled(__get_PRIMASK() == 0)
+    {
+        if (_enabled) {
+            __disable_irq();
+        }
+    }
+    ~CriticalSection()
+    {
+        if (_enabled) {
+            __enable_irq();
+        }
+    }
+
+private:
+    bool                _enabled = false;
+};
+
+#define BEGIN_CRITICAL_SECTION  do { CriticalSection _crit
+#define END_CRITICAL_SECTION    } while(0)  
+
 #define WAKEUP0_IRQ     Interrupt(WAKEUP0_IRQn)
 #define WAKEUP1_IRQ     Interrupt(WAKEUP1_IRQn)
 #define WAKEUP2_IRQ     Interrupt(WAKEUP2_IRQn)
