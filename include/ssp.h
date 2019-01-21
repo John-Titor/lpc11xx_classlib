@@ -34,7 +34,7 @@ class SSP
 {
 public:
     constexpr SSP(unsigned index) :
-        _reg((index == 0) ? *LPC_SSP0 : *LPC_SSP1),
+        _reg((index == 0) ? * LPC_SSP0 : * LPC_SSP1),
         _syscon((index == 0) ? SYSCON_SSP0 : SYSCON_SSP1)
     {}
 

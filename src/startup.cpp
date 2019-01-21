@@ -48,14 +48,14 @@ _start()
     // Load .data from rom image.
     auto rp = &_data_rom;
     auto wp = &_data_start;
-    
+
     while (wp < &_data_end) {
         *wp++ = *rp++;
     }
-    
+
     // Clear .bss.
     wp = &_bss_start;
-    
+
     while (wp < &_bss_end) {
         *wp++ = 0;
     }
@@ -66,14 +66,15 @@ _start()
     // Fill the stack with 1s
     register unsigned long sp asm("sp");
     wp = (uint32_t *)(sp - 16);
+
     while (wp >= &_bss_end) {
         *wp-- = 0xffffffff;
     }
 
     // Call constructors.
     auto fp = &_init_array_start;
-    
-    while(fp < &_init_array_end) {
+
+    while (fp < &_init_array_end) {
         (*fp++)();
     }
 

@@ -162,10 +162,10 @@ private:
         FCR_Tx_FIFO_Reset_MASK                  = 0x00000004,
         FCR_Tx_FIFO_Reset                       = 0x00000004, // Clear Tx FIFO
         FCR_Rx_Trigger_Level_Select_MASK        = 0x000000C0, // Chars written before before interrupt
-        FCR_Rx_Trigger_Level_Select_1Char       = 0x00000000, 
-        FCR_Rx_Trigger_Level_Select_4Char       = 0x00000040, 
-        FCR_Rx_Trigger_Level_Select_8Char       = 0x00000080, 
-        FCR_Rx_Trigger_Level_Select_12Char      = 0x000000C0, 
+        FCR_Rx_Trigger_Level_Select_1Char       = 0x00000000,
+        FCR_Rx_Trigger_Level_Select_4Char       = 0x00000040,
+        FCR_Rx_Trigger_Level_Select_8Char       = 0x00000080,
+        FCR_Rx_Trigger_Level_Select_12Char      = 0x000000C0,
     };
 
     enum MCR : uint32_t {
@@ -259,7 +259,7 @@ private:
         ACR_AutoRestart_NoRestart               = 0x00000000,
         ACR_AutoRestart_Restart                 = 0x00000004, // Restart in case of time-out
         ACR_ABEOIntClr_MASK                     = 0x00000100, // End of auto-baud interrupt clear bit
-        ACR_ABEOIntClr                          = 0x00000100, 
+        ACR_ABEOIntClr                          = 0x00000100,
         ACR_ABTOIntClr_MASK                     = 0x00000200, // Auto-baud timeout interrupt clear bit
         ACR_ABTOIntClr                          = 0x00000200,
     };
@@ -282,7 +282,7 @@ private:
         RS485CTRL_RXDIS                         = 0x00000002,
         RS485CTRL_AADEN_MASK                    = 0x00000004, // Auto-address detect
         RS485CTRL_AADEN                         = 0x00000004,
-        RS485CTRL_SEL_MASK                      = 0x00000008, 
+        RS485CTRL_SEL_MASK                      = 0x00000008,
         RS485CTRL_SEL_RTS                       = 0x00000000, // Use RTS for direction control
         RS485CTRL_SEL_DTS                       = 0x00000008, // Use DTS for direction control
         RS485CTRL_DCTRL_MASK                    = 0x00000010, // Enable/Disable auto-direction control

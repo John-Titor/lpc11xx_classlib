@@ -42,9 +42,9 @@ public:
 
     constexpr Timer(unsigned index) :
         _index(index),
-        _regs((index == 0) ? *LPC_TMR16B0 :
-              (index == 1) ? *LPC_TMR16B1 :
-              (index == 2) ? *LPC_TMR32B0 : *LPC_TMR32B1),
+        _regs((index == 0) ? * LPC_TMR16B0 :
+              (index == 1) ? * LPC_TMR16B1 :
+              (index == 2) ? * LPC_TMR32B0 : * LPC_TMR32B1),
         _syscon((index == 0) ? SYSCON_CT16B0 :
                 (index == 1) ? SYSCON_CT16B1 :
                 (index == 2) ? SYSCON_CT32B0 : SYSCON_CT32B1)
@@ -173,21 +173,21 @@ protected:
         CTCR_CTMODE_COUNTERRISING   = 0x00000001, // Counter: TC increments on rising edge of input
         CTCR_CTMODE_COUNTERFALLING  = 0x00000002, // Counter: TC increments on falling edge of input
         CTCR_CTMODE_COUNTERBOTH     = 0x00000003, // Counter: TC increments on both edges of input
-        CTCR_CINPUTSELECT_MASK      = 0x0000000C,   
+        CTCR_CINPUTSELECT_MASK      = 0x0000000C,
         CTCR_CINPUTSELECT           = 0x00000000, // CINPUTSELECT must be set to 00
     };
 
     enum PWMC : uint32_t {
-        PWMC_PWM0_MASK              = 0x00000001,   
+        PWMC_PWM0_MASK              = 0x00000001,
         PWMC_PWM0_ENABLED           = 0x00000001, // PWM mode is enabled for CT32Bn_MAT0
         PWMC_PWM0_DISABLED          = 0x00000000,
-        PWMC_PWM1_MASK              = 0x00000002,   
+        PWMC_PWM1_MASK              = 0x00000002,
         PWMC_PWM1_ENABLED           = 0x00000002, // PWM mode is enabled for CT32Bn_MAT1
         PWMC_PWM1_DISABLED          = 0x00000000,
-        PWMC_PWM2_MASK              = 0x00000004,   
+        PWMC_PWM2_MASK              = 0x00000004,
         PWMC_PWM2_ENABLED           = 0x00000004, // PWM mode is enabled for CT32Bn_MAT2
         PWMC_PWM2_DISABLED          = 0x00000000,
-        PWMC_PWM3_MASK              = 0x00000008,   
+        PWMC_PWM3_MASK              = 0x00000008,
         PWMC_PWM3_ENABLED           = 0x00000008,
         PWMC_PWM3_DISABLED          = 0x00000000,
     };

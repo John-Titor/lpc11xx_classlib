@@ -102,6 +102,7 @@ Timebase::time()
     if (count < old_count) {
         tb_high += mask + 1;
     }
+
     _time = tb_high | count;
 
     return _time;

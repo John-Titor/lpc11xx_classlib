@@ -34,7 +34,7 @@ SSP::configure(unsigned rate, unsigned nbits, unsigned mode)
     _syscon.clock(true);
     _syscon.reset();
     _reg.CPSR = CPSR_CPSDVSR_DIV2;
-    _reg.CR0 = ((CR0_DSS_4BIT + (nbits - 4)) | 
+    _reg.CR0 = ((CR0_DSS_4BIT + (nbits - 4)) |
                 CR0_FRF_SPI |
                 ((mode == 0) ? CR0_CPOL_LOW | CR0_CPHA_FIRST :
                  (mode == 1) ? CR0_CPOL_LOW | CR0_CPHA_SECOND :
@@ -58,6 +58,7 @@ SSP::transfer(uint8_t *source, uint8_t *destination, unsigned count)
             _reg.DR = *source++;
             txresid--;
         }
+
         if ((rxresid > 0) && (_reg.SR & SR_RNE_NOTEMPTY)) {
             *destination++ = _reg.DR;
             rxresid--;
@@ -77,6 +78,7 @@ SSP::transfer(uint16_t *source, uint16_t *destination, unsigned count)
             _reg.DR = *source++;
             txresid--;
         }
+
         if ((rxresid > 0) && (_reg.SR & SR_RNE_NOTEMPTY)) {
             *destination++ = _reg.DR;
             rxresid--;

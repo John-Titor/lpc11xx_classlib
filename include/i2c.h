@@ -47,7 +47,7 @@ public:
         ACK,
         NACK,
         ERROR
-    };         
+    };
 
     I2C(uint8_t slave,
         const uint8_t *writeBuffer,

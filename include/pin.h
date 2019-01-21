@@ -58,9 +58,9 @@ public:
     };
 
 private:
-    __IO uint32_t       * const _iocon_reg;
+    __IO uint32_t        *const _iocon_reg;
     const uint32_t      _iocon_val;
-    __IO uint32_t       * const _loc_reg;
+    __IO uint32_t        *const _loc_reg;
     const uint32_t      _loc_val;
 
 
@@ -76,9 +76,11 @@ public:
     {}
 
     Pin &configure(uint32_t modifier = 0) __always_inline {
-        if (_loc_reg) {
+        if (_loc_reg)
+        {
             *_loc_reg = _loc_val;
         }
+
         *_iocon_reg = _iocon_val | modifier;
         return *this;
     }
@@ -93,13 +95,13 @@ public:
     };
 
 private:
-    LPC_GPIO_TypeDef    * const _port;
+    LPC_GPIO_TypeDef     *const _port;
     const unsigned      _pin_number;
     const unsigned      _pin_mask;
 
 public:
-    constexpr Gpio(unsigned port_number, 
-                   unsigned pin_number, 
+    constexpr Gpio(unsigned port_number,
+                   unsigned pin_number,
                    __IO uint32_t *iocon_reg,
                    uint32_t iocon_val) :
         Pin(iocon_reg, iocon_val),
@@ -111,11 +113,14 @@ public:
     {}
 
     Gpio &configure(Direction_t direction, uint32_t modifier = 0) __always_inline {
-        if (direction == Output) {
+        if (direction == Output)
+        {
             _port->DIR |= _pin_mask;
-        } else {
+        } else
+        {
             _port->DIR &= ~_pin_mask;
         }
+
         Pin::configure(modifier);
         return *this;
     }

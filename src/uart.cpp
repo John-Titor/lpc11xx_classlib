@@ -58,14 +58,14 @@ UART::set_divisors(uint32_t rate)
      */
     dval = Syscon::PCLK_FREQ % rate16;
 
-   /* The PCLK / (16 * Baudrate) is fractional
-    * => dval = pclk % rate16
-    * mval = rate16;
-    * now normalize the ratio
-    * dval / mval = 1 / new_mval
-    * new_mval = mval / dval
-    * new_dval = 1
-    */
+    /* The PCLK / (16 * Baudrate) is fractional
+     * => dval = pclk % rate16
+     * mval = rate16;
+     * now normalize the ratio
+     * dval / mval = 1 / new_mval
+     * new_mval = mval / dval
+     * new_dval = 1
+     */
     if (dval > 0) {
         mval = rate16 / dval;
         dval = 1;
@@ -79,6 +79,7 @@ UART::set_divisors(uint32_t rate)
     } else {
         mval = 0;
     }
+
     dval &= 0xf;
     mval &= 0xf;
     dl = Syscon::PCLK_FREQ / (rate16 + rate16 * dval / mval);

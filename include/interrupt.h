@@ -70,7 +70,7 @@ private:
 };
 
 #define BEGIN_CRITICAL_SECTION  do { CriticalSection _crit
-#define END_CRITICAL_SECTION    } while(0)  
+#define END_CRITICAL_SECTION    } while(0)
 
 #define WAKEUP0_IRQ     Interrupt(WAKEUP0_IRQn)
 #define WAKEUP1_IRQ     Interrupt(WAKEUP1_IRQn)

@@ -42,6 +42,7 @@ Syscon::init_48MHz()
     LPC_SYSCON->MAINCLKUEN = MAINCLKUEN_UPDATE;
     LPC_SYSCON->MAINCLKUEN = MAINCLKUEN_DISABLE;
     LPC_SYSCON->MAINCLKUEN = MAINCLKUEN_UPDATE;
+
     while (!(LPC_SYSCON->MAINCLKUEN & MAINCLKUEN_UPDATE)) {
         // wait for the bit to self-clear indicating the main clock has switched
     }
@@ -51,6 +52,7 @@ Syscon::init_48MHz()
     LPC_SYSCON->SYSPLLCLKUEN = PLLCLKUEN_UPDATE;
     LPC_SYSCON->SYSPLLCLKUEN = PLLCLKUEN_DISABLE;
     LPC_SYSCON->SYSPLLCLKUEN = PLLCLKUEN_UPDATE;
+
     while (!(LPC_SYSCON->SYSPLLCLKUEN & PLLCLKUEN_UPDATE)) {
         // wait for the bit to self-clear indicating the PLL input clock has switched
     }
@@ -63,6 +65,7 @@ Syscon::init_48MHz()
 
     // turn the PLL back on
     LPC_SYSCON->PDRUNCFG &= ~PDRUNCFG_SYSPLL_MASK;
+
     while (!(LPC_SYSCON->SYSPLLSTAT & PLLSTAT_LOCK)) {
         // wait for the lock bit to set
     }
@@ -72,6 +75,7 @@ Syscon::init_48MHz()
     LPC_SYSCON->MAINCLKUEN = MAINCLKUEN_UPDATE;     // toggle high to update clock source
     LPC_SYSCON->MAINCLKUEN = MAINCLKUEN_DISABLE;    // toggle high to update clock source
     LPC_SYSCON->MAINCLKUEN = MAINCLKUEN_UPDATE;     // toggle high to update clock source
+
     while (!(LPC_SYSCON->MAINCLKUEN & MAINCLKUEN_UPDATE)) {
         // wait for the bit to self-clear indicating the main clock has switched
     }

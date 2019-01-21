@@ -13,6 +13,7 @@ I2C::transfer()
         _state = ERROR;
         return;
     }
+
     _state = IDLE;
     current = this;
 
@@ -33,9 +34,9 @@ I2C::transfer()
 
     /* SCLH and SCLL = I2C PCLK High/Low cycles for I2C clock and
       determine the data rate/duty cycle for I2C:
-       
+
        I2CBitFrequency = I2CPCLK / (I2CSCLH + I2CSCLL)
-      
+
        Standard Mode   (100KHz) = CFG_CPU_CCLK / 200000
        Fast Mode       (400KHz) = CFG_CPU_CCLK / 800000
        Fast- Mode Plus (1MHz)   = CFG_CPU_CCLK / 2000000       */
@@ -48,6 +49,7 @@ I2C::transfer()
 
     // start the transfer
     LPC_I2C->CONSET = CONSET_I2EN;
+
     if (!start()) {
         stop();
         goto done;
@@ -71,14 +73,16 @@ I2C::start()
 {
     LPC_I2C->CONSET = CONSET_STA;
 
-    // make sure it starts - 
+    // make sure it starts -
     unsigned timeout = 0x1000000;
+
     while (_state == IDLE) {
         if (--timeout == 0) {
             _state = ERROR;
             return false;
         }
     }
+
     return true;
 }
 
@@ -90,12 +94,14 @@ I2C::stop()
 
     // wait for stop bit to clear
     unsigned timeout = 0x1000000;
+
     while (LPC_I2C->CONSET & CONSET_STO) {
         if (--timeout == 0) {
             _state = ERROR;
             return false;
         }
     }
+
     return true;
 }
 
@@ -116,7 +122,7 @@ I2C::handleInterrupt()
         LPC_I2C->CONCLR = (CONCLR_SIC | CONCLR_STAC);
         _state = PENDING;
         break;
-    
+
     case 0x10:
         /*
          * A repeated START condition has been transmitted.
@@ -124,8 +130,8 @@ I2C::handleInterrupt()
          */
         LPC_I2C->DAT = _slave | 1;
         LPC_I2C->CONCLR = (CONCLR_SIC | CONCLR_STAC);
-    break;
-    
+        break;
+
     case 0x18:
         /*
          * SLA+W has been transmitted; ACK has been received.
@@ -147,6 +153,7 @@ I2C::handleInterrupt()
         break;
 
     case 0x28:
+
         /*
          * Data in I2DAT has been transmitted; ACK has been received.
          * Continue sending more bytes as long as there are bytes to send
@@ -165,6 +172,7 @@ I2C::handleInterrupt()
                 LPC_I2C->CONSET = CONSET_STO;      /* Set Stop flag */
             }
         }
+
         LPC_I2C->CONCLR = CONCLR_SIC;
         break;
 
@@ -192,6 +200,7 @@ I2C::handleInterrupt()
         break;
 
     case 0x40:
+
         /*
          * SLA+R has been transmitted; ACK has been received.
          * Initialize a read.
@@ -205,6 +214,7 @@ I2C::handleInterrupt()
             /* more bytes to follow: send an ACK after data is received */
             LPC_I2C->CONSET = CONSET_AA;
         }
+
         LPC_I2C->CONCLR = CONCLR_SIC;
         break;
 
@@ -226,6 +236,7 @@ I2C::handleInterrupt()
          * Send a NOT ACK after the last byte is received
          */
         *_readIter++ = LPC_I2C->DAT;
+
         if (_readIter < _readBuffer.end()) {
             /* lmore bytes to follow: send an ACK after data is received */
             LPC_I2C->CONSET = CONSET_AA;
@@ -233,9 +244,10 @@ I2C::handleInterrupt()
             /* last byte: send a NACK after data is received */
             LPC_I2C->CONCLR = CONCLR_AAC;
         }
+
         LPC_I2C->CONCLR = CONCLR_SIC;
         break;
-    
+
     case 0x58:
         /*
          * Data byte has been received; NOT ACK has been returned.

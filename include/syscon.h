@@ -103,7 +103,7 @@ public:
 
     enum PLLSTAT : uint32_t {
         PLLSTAT_LOCK                    = 0x00000001, // 0 = PLL not locked, 1 = PLL locked
-        PLLSTAT_LOCK_MASK               = 0x00000001,    
+        PLLSTAT_LOCK_MASK               = 0x00000001,
     };
 
     enum SYSOSCCTRL : uint32_t {
@@ -209,8 +209,8 @@ public:
     enum SYSAHBCLKDIV : uint32_t {
         SYSAHBCLKDIV_DISABLE            = 0x00000000, // 0 will shut the system clock down completely
         SYSAHBCLKDIV_DIV1               = 0x00000001, // 1, 2 or 4 are the most common values
-        SYSAHBCLKDIV_DIV2               = 0x00000002,    
-        SYSAHBCLKDIV_DIV4               = 0x00000004,    
+        SYSAHBCLKDIV_DIV2               = 0x00000002,
+        SYSAHBCLKDIV_DIV4               = 0x00000004,
         SYSAHBCLKDIV_MASK               = 0x000000FF, // AHB clock divider can be from 0 to 255
     };
 
@@ -278,7 +278,7 @@ public:
         WDTCLKSEL_SOURCE_INTERNALOSC    = 0x00000000, // Use the internal oscillator
         WDTCLKSEL_SOURCE_INPUTCLOCK     = 0x00000001, // Use the main clock
         WDTCLKSEL_SOURCE_WATCHDOGOSC    = 0x00000002, // Use the watchdog oscillator
-        WDTCLKSEL_MASK                  = 0x00000003,    
+        WDTCLKSEL_MASK                  = 0x00000003,
     };
 
     enum WDTCLKUEN : uint32_t {
@@ -570,7 +570,7 @@ public:
 
     enum PDRUNCFG : uint32_t {
         PDRUNCFG_IRCOUT                 = 0x00000001, // IRC oscillator output power-down
-        PDRUNCFG_IRCOUT_MASK            = 0x00000001,    
+        PDRUNCFG_IRCOUT_MASK            = 0x00000001,
         PDRUNCFG_IRC                    = 0x00000002, // IRC oscillator power-down
         PDRUNCFG_IRC_MASK               = 0x00000002,
         PDRUNCFG_FLASH                  = 0x00000004, // Flash power-down

@@ -72,9 +72,8 @@ void EINT2_Handler(void)            __attribute__((weak, alias("_badhandler")));
 void EINT1_Handler(void)            __attribute__((weak, alias("_badhandler")));
 void EINT0_Handler(void)            __attribute__((weak, alias("_badhandler")));
 
-funcp_t _vectors[] __attribute__((section(".vectors"))) = 
-{
-    [0]                         = (funcp_t)&_stacktop,
+funcp_t _vectors[] __attribute__((section(".vectors"))) = {
+    [0]                         = (funcp_t) &_stacktop,
     [1]                         = _start,
     [16 + NonMaskableInt_IRQn]  = NonMaskableInt_Handler,
     [16 + HardFault_IRQn]       = HardFault_Handler,
