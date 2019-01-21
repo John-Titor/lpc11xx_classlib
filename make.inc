@@ -4,12 +4,19 @@
 # Set BIN to build a binary.
 # Set LIB to build a static library.
 # Set CHIP to the chip to be supported, one of LPC1114FN28 (add more)
-# Set SRCS to the source files to be built.
-# Set PORT to a serial port to upload.
+# Set SRCS to source files to be built.
+# Set PORT to a serial port to upload to.
 # Set INCLUDES to a list of include paths.
 # Set DEFINES to a list of symbols to define.
 # Set LIBS with BIN to link additional libraries.
 # Set EXTRA_FMT_SRCS to reformat other source files (e.g. headers)
+#
+# Targets:
+# $(BIN)	builds the binary if BIN was set
+# $(LIB)	builds the library if LIB was set
+# upload	builds and uploads the binary if BIN was set
+# clean		cleans out the build directory
+# reformat	reformats $(SRCS) and $(EXTRA_FMT_SRCS)
 #
 
 # Sanity-check variables
@@ -92,6 +99,11 @@ $(_ELF): $(_OBJS) $(_EXTRA_DEPS) $(_LDSCRIPT)
 	@echo $@
 	@$(CC) -o $@ $(_OBJS) $(_LDFLAGS) -T$(_LDSCRIPT)
 	@$(SIZE) $@
+
+.PHONY: upload
+upload: $(BIN)
+	$(PROGRAMMER) -bin -control -verify -term $< $(PORT) 115200 12000
+
 endif
 
 #
@@ -122,10 +134,7 @@ $(filter %.cpp.o,$(_OBJS)): $(_OBJDIR)/%.o: % $(_EXTRA_DEPS)
 #
 # Utility rules
 #
-.PHONY: upload clean reformat
-
-upload: $(BIN)
-	$(PROGRAMMER) -bin -control -verify -term $< $(PORT) 115200 12000
+.PHONY: clean reformat
 
 clean:
 	rm -rf $(_OBJDIR)
