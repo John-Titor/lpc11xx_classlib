@@ -1,13 +1,6 @@
-CHIP            = LPC1114FN28
-LIB             = obj/lpc11xx_classlib.a
-SRCS            = $(wildcard src/*.cpp) $(wildcard src/*.c)
-EXTRA_FMT_SRCS  = $(wildcard include/*.h)
+.PHONY: test $(MAKECMDGOALS)
 
-.PHONY: all test
-
-all: $(LIB) test
+$(MAKECMDGOALS): test
 
 test:
-	make -C ./test
-
-include make.inc
+	make -C ./test $(MAKECMDGOALS)

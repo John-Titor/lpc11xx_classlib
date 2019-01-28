@@ -3,19 +3,31 @@
 #include <syscon.h>
 #include <pin.h>
 
-I2C *current = nullptr;
+#include "config.h"
 
-void
-I2C::transfer()
+I2C     I2C0;
+
+I2C::State
+I2C::transfer(uint8_t slave,
+              const uint8_t *writeBuffer,
+              uint8_t writeLength,
+              uint8_t *readBuffer,
+              uint8_t readLength)
 {
-    // can't run more than one transaction at a time
-    if (current != nullptr) {
-        _state = ERROR;
-        return;
+    // claim ownership of the interface
+    bool expected = false;
+    if (!_busy.compare_exchange_strong(expected, true)) {
+        return ERROR;
     }
 
     _state = IDLE;
-    current = this;
+    _slave = slave;
+    
+    _writeBuffer = etl::const_array_view<unsigned char>(writeBuffer, writeLength);
+    _writeIter = _writeBuffer.begin();
+
+    _readBuffer = etl::array_view<unsigned char>(readBuffer, readLength);
+    _readIter = _readBuffer.begin();
 
     // take block out of reset
     SYSCON_I2C.reset();
@@ -41,8 +53,8 @@ I2C::transfer()
        Fast Mode       (400KHz) = CFG_CPU_CCLK / 800000
        Fast- Mode Plus (1MHz)   = CFG_CPU_CCLK / 2000000       */
 
-    LPC_I2C->SCLL = 48000000 / 200000;
-    LPC_I2C->SCLH = 48000000 / 200000;
+    LPC_I2C->SCLL = CONFIG_CPU_FREQUENCY / 200000;
+    LPC_I2C->SCLH = CONFIG_CPU_FREQUENCY / 200000;
 
     // enable interrupt
     I2C_IRQ.enable();
@@ -63,9 +75,13 @@ I2C::transfer()
 
     // relinquish the controller
 done:
-    current = nullptr;
+    auto result = _state;
+
     SYSCON_I2C.clock(false);
     I2C_IRQ.disable();
+    _busy.store(false);
+
+    return result;
 }
 
 bool
@@ -84,6 +100,20 @@ I2C::start()
     }
 
     return true;
+}
+
+I2C::State
+I2C::writeRegister(uint8_t slave, uint8_t address, uint8_t value)
+{
+    uint8_t buffer[] = { address, value };
+
+    return transfer(slave, buffer, sizeof(buffer));
+}
+
+I2C::State
+I2C::readRegister(uint8_t slave, uint8_t address, uint8_t &value)
+{
+    return transfer(slave, &address, 1, &value, 1);
 }
 
 bool
@@ -268,8 +298,8 @@ extern "C"
 void
 I2C_Handler()
 {
-    if (current != nullptr) {
-        current->handleInterrupt();
+    if (I2C0._busy) {
+        I2C0.handleInterrupt();
     } else {
         I2C_IRQ.disable();
     }

@@ -1,3 +1,6 @@
 [submodule "etl"]
 	path = etl
 	url = https://github.com/ETLCPP/etl.git
+[submodule "scmrtos"]
+	path = scmrtos
+	url = https://github.com/scmrtos/scmrtos.git

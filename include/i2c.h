@@ -26,10 +26,13 @@
 
 #pragma once
 
-#include <LPC11xx.h>
+#include <sys/cdefs.h>
+
 #include <etl/array.h>
 #include <etl/array_view.h>
-#include <sys/cdefs.h>
+#include <etl/atomic.h>
+
+#include <LPC11xx.h>
 
 extern "C" void I2C_Handler(void);
 
@@ -49,31 +52,23 @@ public:
         ERROR
     };
 
-    I2C(uint8_t slave,
-        const uint8_t *writeBuffer,
-        uint8_t writeLength,
-        uint8_t *readBuffer = nullptr,
-        uint8_t readLength = 0) :
-        _state(IDLE),
-        _slave(slave),
-        _writeBuffer(writeBuffer, writeLength),
-        _writeIter(_writeBuffer.begin()),
-        _readBuffer(readBuffer, readLength),
-        _readIter(_readBuffer.begin())
-    {
-        transfer();
-    }
+    State                    transfer(uint8_t slave,
+                                      const uint8_t *writeBuffer,
+                                      uint8_t writeLength,
+                                      uint8_t *readBuffer = nullptr,
+                                      uint8_t readLength = 0);
 
-    State                   result() const { return _state; }
+    State                   writeRegister(uint8_t slave, uint8_t address, uint8_t value);
+    State                   readRegister(uint8_t slave, uint8_t address, uint8_t &value);
 
     friend void I2C_Handler(void);
 
 private:
 
-    static I2C                                      *current;
+    etl::atomic<bool>                               _busy;
 
-    State                                           _state;
-    uint8_t                                         _slave;
+    State                                           _state = IDLE;
+    uint8_t                                         _slave = 0;
     etl::const_array_view<uint8_t>                  _writeBuffer;
     etl::const_array_view<uint8_t>::const_iterator  _writeIter;
     etl::array_view<uint8_t>                        _readBuffer;
@@ -150,4 +145,4 @@ private:
 
 };
 
-#define I2C0        I2C()
+extern I2C      I2C0;

@@ -1,13 +1,12 @@
 #
 # Re-usable build rules for projects using lpc11xx_classlib
 #
-# Set BIN to build a binary.
-# Set LIB to build a static library.
+# Set BIN to the binary to be built.
 # Set CHIP to the chip to be supported, one of LPC1114FN28 (add more)
 # Set SRCS to source files to be built.
 # Set PORT to a serial port to upload to.
 # Set INCLUDES to a list of include paths.
-# Set DEFINES to a list of symbols to define.
+# Set DEFINES to a list of symbols to define. Set scmRTOS_PROCESS_COUNT to enable scmRTOS.
 # Set LIBS with BIN to link additional libraries.
 # Set EXTRA_FMT_SRCS to reformat other source files (e.g. headers)
 #
@@ -20,6 +19,9 @@
 #
 
 # Sanity-check variables
+ifeq ($(BIN),)
+$(error No binary to build)
+endif
 ifeq ($(SRCS),)
 $(error No source files listed in SRCS)
 endif
@@ -27,10 +29,17 @@ ifeq ($(if $(filter upload,$(MAKECMDGOALS)),$(PORT),NOT_REQUIRED),)
 $(error Must set PORT before attempting to upload)
 endif
 
+ifeq ($(VERBOSE),)
+_V		 = @
+endif
+
 # Computed paths
-_LIBDIR		:= $(dir $(lastword $(MAKEFILE_LIST)))
-_OBJS		 = $(foreach src,$(SRCS),$(_OBJDIR)/$(src).o)
-_DEPS		 = $(_OBJS:.o=.d)
+_PROJDIR	:= $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
+_LIBDIR		:= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+_OBJDIR		:= $(dir $(abspath $(BIN)))
+
+# Library sources
+SRCS           += $(wildcard $(_LIBDIR)src/*.cpp) $(wildcard $(_LIBDIR)src/*.c)
 
 # Tools
 CC		 = arm-none-eabi-gcc
@@ -42,9 +51,10 @@ ASTYLE		 = astyle
 
 # Common compile arguments
 EXTRA_DEPS	+= $(MAKEFILE_LIST)
-INCLUDES	+= $(_LIBDIR)/include \
-		   $(_LIBDIR)/include/CMSIS \
-		   $(_LIBDIR)/etl/include
+INCLUDES	+= $(_LIBDIR)include \
+		   $(_LIBDIR)include/CMSIS \
+		   $(_LIBDIR)etl/include \
+		   $(_LIBDIR)scmrtos
 DEFINES		+= $(CHIP)
 
 # Compiler options
@@ -66,7 +76,7 @@ _COMMON_FLAGS    = $(addprefix -D,$(DEFINES)) \
 _CFLAGS      	 = -std=gnu11 \
 		   $(CFLAGS)
 
-_CXXFLAGS	 = -std=gnu++11 \
+_CXXFLAGS	 = -std=gnu++14 \
 		   -fno-exceptions \
 		   -fno-rtti \
 		   $(CXXFLAGS)
@@ -83,53 +93,40 @@ _LDFLAGS	= $(_ARCH_FLAGS) \
 		  -lgcc \
 		  $(LDFLAGS)
 
-#
-# If building a binary
-#
-ifneq ($(BIN),)
+
 _ELF		 = $(BIN:.bin=.elf)
-_OBJDIR		 = $(dir $(abspath $(BIN)))
-_LDSCRIPT	 = $(_LIBDIR)/$(CHIP).ld
+_LDSCRIPT	 = $(_LIBDIR)$(CHIP).ld
+_OBJS		 = $(foreach src,$(SRCS),$(_OBJDIR)$(src).o)
+_DEPS		 = $(_OBJS:.o=.d)
+
+#$(info SRCS $(notdir $(SRCS)))
+#$(info OBJS $(notdir $(_OBJS)))
 
 $(BIN): $(_ELF) $(_EXTRA_DEPS)
-	@echo $@
-	@$(OBJCOPY) -Obinary $< $@
+	@echo BINARY $(notdir $@)
+	$(_V)$(OBJCOPY) -Obinary $< $@
 
 $(_ELF): $(_OBJS) $(_EXTRA_DEPS) $(_LDSCRIPT)
-	@echo $@
-	@$(CC) -o $@ $(_OBJS) $(_LDFLAGS) -T$(_LDSCRIPT)
-	@$(SIZE) $@
+	@echo ELF $(notdir $@)
+	$(_V)$(CC) -o $@ $(_OBJS) $(_LDFLAGS) -T$(_LDSCRIPT)
+	$(_V)$(SIZE) $@
 
 .PHONY: upload
 upload: $(BIN)
 	$(PROGRAMMER) -bin -control -verify -term $< $(PORT) 115200 12000
 
-endif
-
-#
-# If building a library
-#
-ifneq ($(LIB),)
-_OBJDIR		 = $(dir $(abspath $(LIB)))
-
-$(LIB): $(_OBJS) $(_EXTRA_DEPS)
-	@echo $@
-	@$(AR) ru $@ $(_OBJS)
-endif
-
-
 #
 # Rules for building object files.
 #
-$(filter %.c.o,$(_OBJS)): $(_OBJDIR)/%.o: % $(_EXTRA_DEPS)
-	@echo $@
-	@mkdir -p $(dir $@)
-	@$(CC) -c -o $@ $< $(_COMMON_FLAGS) $(_CFLAGS)
+$(filter %.c.o,$(_OBJS)): $(_OBJDIR)%.o: % $(_EXTRA_DEPS)
+	@echo CC $(notdir $@)
+	$(_V)mkdir -p $(dir $@)
+	$(_V)$(CC) -c -o $@ $< $(_COMMON_FLAGS) $(_CFLAGS)
 
-$(filter %.cpp.o,$(_OBJS)): $(_OBJDIR)/%.o: % $(_EXTRA_DEPS)
-	@echo $@
-	@mkdir -p $(dir $@)
-	@$(CC) -c -o $@ $< $(_COMMON_FLAGS) $(_CXXFLAGS)
+$(filter %.cpp.o,$(_OBJS)): $(_OBJDIR)%.o: % $(_EXTRA_DEPS)
+	@echo C++ $(notdir $@)
+	$(_V)mkdir -p $(dir $@)
+	$(_V)$(CC) -c -o $@ $< $(_COMMON_FLAGS) $(_CXXFLAGS)
 
 #
 # Utility rules

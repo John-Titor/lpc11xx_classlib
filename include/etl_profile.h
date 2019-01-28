@@ -1,5 +1,6 @@
 // ETL profile
 
 #define ETL_LOG_ERRORS
+//#define ETL_NO_STL            etl::atomic<bool> does not work with this set
 
-#include <etl/profiles/cpp11_no_stl.h>
+#include <etl/profiles/gcc_generic.h>
