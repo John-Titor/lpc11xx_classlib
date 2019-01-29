@@ -28,6 +28,7 @@
 
 #include <sys/cdefs.h>
 
+#include <etl/atomic.h>
 #include <etl/array.h>
 #include <etl/array_view.h>
 
@@ -80,7 +81,7 @@ public:
 
 private:
 
-    volatile bool                                   _busy;
+    etl::atomic<bool>                               _busy;
 
     State                                           _state = IDLE;
     uint8_t                                         _slave = 0;

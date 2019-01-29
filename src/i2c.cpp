@@ -41,14 +41,10 @@ I2C::transfer(uint8_t slave,
               uint8_t readLength)
 {
     // claim ownership of the interface
-    BEGIN_CRITICAL_SECTION;
-
-    if (_busy) {
+    auto expected = false;
+    if (!_busy.compare_exchange_strong(expected, true)) {
         return ERROR;
     }
-    _busy = true;
-
-    END_CRITICAL_SECTION;
 
     _state = IDLE;
     _slave = slave;
@@ -109,7 +105,7 @@ done:
 
     SYSCON_I2C.clock(false);
     I2C_IRQ.disable();
-    _busy = false;
+    _busy.store(false);
 
     return result;
 }
