@@ -26,8 +26,9 @@
 
 #pragma once
 
+#include <sys/cdefs.h>
+
 #include <LPC11xx.h>
-#include "_compiler.h"
 
 class Interrupt
 {
@@ -36,13 +37,13 @@ public:
         _vector(vector)
     {}
 
-    void                enable()  const __always_inline { NVIC_EnableIRQ(_vector); }
-    void                disable() const __always_inline { NVIC_DisableIRQ(_vector); }
-    void                set_priority(unsigned priority) const __always_inline { NVIC_SetPriority(_vector, priority); }
+    __always_inline void                enable()  const { NVIC_EnableIRQ(_vector); }
+    __always_inline void                disable() const { NVIC_DisableIRQ(_vector); }
+    __always_inline void                set_priority(unsigned priority) const { NVIC_SetPriority(_vector, priority); }
 
-    static void         enable_all() __always_inline { __enable_irq(); }
-    static void         disable_all() __always_inline { __disable_irq(); }
-    static void         wait() __always_inline { __WFI(); }
+    __always_inline static void         enable_all() { __enable_irq(); }
+    __always_inline static void         disable_all() { __disable_irq(); }
+    __always_inline static void         wait() { __WFI(); }
 
 private:
     const IRQn_Type      _vector;

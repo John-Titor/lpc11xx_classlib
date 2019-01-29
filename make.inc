@@ -83,7 +83,6 @@ _CXXFLAGS	 = -std=gnu++14 \
 
 _LDFLAGS	= $(_ARCH_FLAGS) \
 		  -nostartfiles \
-		  -nostdlib \
 		  -Wl,-gc-sections \
 		  -L/usr/local/arm-none-eabi/lib \
 		  -L$(_LIBDIR) \

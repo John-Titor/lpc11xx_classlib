@@ -30,7 +30,6 @@
 
 #include <etl/array.h>
 #include <etl/array_view.h>
-#include <etl/atomic.h>
 
 #include <LPC11xx.h>
 
@@ -58,14 +57,30 @@ public:
                                       uint8_t *readBuffer = nullptr,
                                       uint8_t readLength = 0);
 
-    State                   writeRegister(uint8_t slave, uint8_t address, uint8_t value);
-    State                   readRegister(uint8_t slave, uint8_t address, uint8_t &value);
+    template<typename TADDR, typename TVALUE>
+    State                   writeRegister(uint8_t slave, TADDR address, TVALUE value)
+    {
+        uint8_t buffer[] = { (uint8_t)(address & 0x7f), (uint8_t)(value & 0xff) };
+
+        return transfer(slave, buffer, sizeof(buffer));
+    }
+
+    template<typename TADDR, typename TVALUE>
+    State                   readRegister(uint8_t slave, TADDR address, TVALUE &value)
+    {
+        uint8_t abuffer[] = { (uint8_t)(address & 0x7f) };
+        uint8_t vbuffer[] = { 0 };
+
+        auto result = transfer(slave, abuffer, 1, vbuffer, 1);
+        value = vbuffer[0];
+        return result;
+    }
 
     friend void I2C_Handler(void);
 
 private:
 
-    etl::atomic<bool>                               _busy;
+    volatile bool                                   _busy;
 
     State                                           _state = IDLE;
     uint8_t                                         _slave = 0;

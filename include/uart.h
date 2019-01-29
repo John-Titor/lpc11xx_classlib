@@ -26,9 +26,12 @@
 
 #pragma once
 
+#include <sys/cdefs.h>
+
 #include <LPC11xx.h>
+
 #include <etl/cstring.h>
-#include "_compiler.h"
+
 #include "syscon.h"
 
 class UART
@@ -38,14 +41,14 @@ public:
 
     UART &configure(unsigned rate);
 
-    void send(uint8_t c) const __always_inline
+    __always_inline void send(uint8_t c) const
     {
         while (!txidle()) {}
 
         LPC_UART->THR = c;
     }
 
-    bool recv(unsigned &c) const __always_inline
+    __always_inline bool recv(unsigned &c) const
     {
         if (rxready()) {
             c = LPC_UART->RBR;
@@ -55,30 +58,30 @@ public:
         return false;
     }
 
-    bool discard() const __always_inline
+    __always_inline bool discard() const
     {
         unsigned c;
         return recv(c);
     }
 
-    bool rxready() const __always_inline { return LPC_UART->LSR & LSR_RDR_DATA; }
-    bool txready() const __always_inline { return LPC_UART->LSR & LSR_THRE; }
-    bool txidle()  const __always_inline { return LPC_UART->LSR & LSR_TEMT; }
+    __always_inline bool rxready() const { return LPC_UART->LSR & LSR_RDR_DATA; }
+    __always_inline bool txready() const { return LPC_UART->LSR & LSR_THRE; }
+    __always_inline bool txidle()  const { return LPC_UART->LSR & LSR_TEMT; }
 
 
-    const UART &operator << (uint8_t c) const __always_inline
+    __always_inline const UART &operator << (uint8_t c) const
     {
         send(c);
         return *this;
     }
 
-    const UART &operator << (char c) const __always_inline
+    __always_inline const UART &operator << (char c) const
     {
         send(c);
         return *this;
     }
 
-    const UART &operator << (const char *s) const __always_inline
+    __always_inline const UART &operator << (const char *s) const
     {
         while (*s != '\0') {
             send(*s++);
@@ -87,7 +90,7 @@ public:
         return *this;
     }
 
-    const UART &operator << (const etl::istring s) const __always_inline
+    __always_inline const UART &operator << (const etl::istring s) const
     {
         auto iter = s.begin();
 

@@ -3,4 +3,4 @@ PORT		 = /dev/cu.SLAB_USBtoUART
 BIN		 = obj/test.bin
 SRCS		:= $(abspath $(wildcard *.cpp))
 
-include ../make.inc
+include $(abspath ../make.inc)

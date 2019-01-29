@@ -4,6 +4,7 @@ extern "C" void main();
 #include <syscon.h>
 #include <pin.h>
 #include <uart.h>
+#include <i2c.h>
 #include <timer.h>
 #include <ssp.h>
 #include <interrupt.h>
@@ -22,9 +23,12 @@ main()
     P0_9_MOSI0.configure();
     SSP0.configure(2400000, 8, 0);
     uint8_t c = 0x55;
-    for (;;) {
-        SSP0.transfer(&c, nullptr, 1);
-    }
+    SSP0.transfer(&c, nullptr, 1);
+
+    // I2C
+    I2C0.writeRegister(0x22, 1, 1);
+    uint8_t reg;
+    I2C0.readRegister(0x22, 1, reg);
 
     // mess around with a GPIO
     P0_2.configure(Gpio::Output, Pin::PushPull);

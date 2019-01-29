@@ -26,8 +26,9 @@
 
 #pragma once
 
-#include <LPC11xx.h>
 #include <sys/cdefs.h>
+
+#include <LPC11xx.h>
 
 class Pin
 {
@@ -75,9 +76,8 @@ public:
         _loc_val(loc_val)
     {}
 
-    Pin &configure(uint32_t modifier = 0) __always_inline {
-        if (_loc_reg)
-        {
+    Pin &configure(uint32_t modifier = 0) {
+        if (_loc_reg) {
             *_loc_reg = _loc_val;
         }
 
@@ -112,7 +112,7 @@ public:
         _pin_mask(1U << _pin_number)
     {}
 
-    Gpio &configure(Direction_t direction, uint32_t modifier = 0) __always_inline {
+    Gpio &configure(Direction_t direction, uint32_t modifier = 0) {
         if (direction == Output)
         {
             _port->DIR |= _pin_mask;
@@ -125,15 +125,15 @@ public:
         return *this;
     }
 
-    bool        get()    const __always_inline { return _port->MASKED_ACCESS[1 << _pin_number] != 0; }
-    void        clear()  const __always_inline { _port->MASKED_ACCESS[1 << _pin_number] = 0; }
-    void        set()    const __always_inline { _port->MASKED_ACCESS[1 << _pin_number] = _pin_mask; }
-    void        toggle() const __always_inline { _port->MASKED_ACCESS[1 << _pin_number] ^= _pin_mask; }
+    bool        get()    const { return _port->MASKED_ACCESS[1 << _pin_number] != 0; }
+    void        clear()  const { _port->MASKED_ACCESS[1 << _pin_number] = 0; }
+    void        set()    const { _port->MASKED_ACCESS[1 << _pin_number] = _pin_mask; }
+    void        toggle() const { _port->MASKED_ACCESS[1 << _pin_number] ^= _pin_mask; }
 
-    operator    bool()   const __always_inline { return get(); }
-    const Gpio &operator    =(bool from) const __always_inline { set(from); return *this; }
+    operator    bool()   const { return get(); }
+    const Gpio &operator    =(bool from) const { set(from); return *this; }
 
-    void set(bool value) const __always_inline
+    __always_inline void set(bool value) const
     {
         if (value) {
             set();
@@ -142,19 +142,19 @@ public:
         }
     }
 
-    const Gpio &operator << (int i) const __always_inline
+    __always_inline const Gpio &operator << (int i) const
     {
         set(i != 0);
         return * this;
     }
 
-    const Gpio &operator << (bool s) const __always_inline
+    __always_inline const Gpio &operator << (bool s) const
     {
         set(s);
         return * this;
     }
 
-    const Gpio &operator=(const Gpio &from) const __always_inline
+    __always_inline const Gpio &operator=(const Gpio &from) const
     {
         set(from.get());
         return *this;

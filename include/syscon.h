@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include <sys/cdefs.h>
+
 #include <LPC11xx.h>
 
 #include "pin.h"
@@ -662,7 +664,7 @@ public:
         _reset_mask(reset)
     {}
 
-    void reset() const __always_inline
+    __always_inline void reset() const
     {
         if (_reset_mask != 0) {
             LPC_SYSCON->PRESETCTRL &= ~_reset_mask;
@@ -670,7 +672,7 @@ public:
         }
     }
 
-    void clock(bool enable) const __always_inline
+    __always_inline void clock(bool enable) const
     {
         if (enable) {
             LPC_SYSCON->SYSAHBCLKCTRL |= _clock_bit;
