@@ -66,8 +66,10 @@ _COMMON_FLAGS    = $(addprefix -D,$(DEFINES)) \
 		   $(addprefix -I,$(INCLUDES)) \
 		   $(_ARCH_FLAGS) \
 		   -ffunction-sections \
+		   -fdata-sections \
 		   -fno-builtin \
 		   -ffreestanding \
+		   -flto \
 		   -MD -MP \
 		   -Os \
 		   -g \
@@ -84,6 +86,7 @@ _CXXFLAGS	 = -std=gnu++14 \
 _LDFLAGS	= $(_ARCH_FLAGS) \
 		  -nostartfiles \
 		  -Wl,-gc-sections \
+		  -Wl,-flto \
 		  -L/usr/local/arm-none-eabi/lib \
 		  -L$(_LIBDIR) \
 		  -Wl,-Map,$@.map \
