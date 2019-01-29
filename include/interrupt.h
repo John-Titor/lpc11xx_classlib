@@ -37,12 +37,12 @@ public:
         _vector(vector)
     {}
 
-    __always_inline void                enable()  const { NVIC_EnableIRQ(_vector); }
+    __always_inline void                enable()  const { __atomic_thread_fence(__ATOMIC_RELEASE); NVIC_EnableIRQ(_vector); }
     __always_inline void                disable() const { NVIC_DisableIRQ(_vector); }
     __always_inline void                set_priority(unsigned priority) const { NVIC_SetPriority(_vector, priority); }
 
-    __always_inline static void         enable_all() { __enable_irq(); }
-    __always_inline static void         disable_all() { __disable_irq(); }
+    __always_inline static void         enable_all() { __atomic_thread_fence(__ATOMIC_RELEASE); __enable_irq(); }
+    __always_inline static void         disable_all() { __disable_irq(); __atomic_thread_fence(__ATOMIC_ACQUIRE); }
     __always_inline static void         wait() { __WFI(); }
 
 private:
@@ -56,18 +56,18 @@ public:
         _enabled(__get_PRIMASK() == 0)
     {
         if (_enabled) {
-            __disable_irq();
+            Interrupt::disable_all();
         }
     }
     ~CriticalSection()
     {
         if (_enabled) {
-            __enable_irq();
+            Interrupt::enable_all();
         }
     }
 
 private:
-    bool                _enabled = false;
+    const bool           _enabled = false;
 };
 
 #define BEGIN_CRITICAL_SECTION  do { CriticalSection _crit
@@ -89,10 +89,10 @@ private:
 #define CAN_IRQ         Interrupt(CAN_IRQn)
 #define SSP1_IRQ        Interrupt(SSP1_IRQn)
 #define I2C_IRQ         Interrupt(I2C_IRQn)
-#define TIMER_16_0      Interrupt(TIMER_16_0_IRQn)
-#define TIMER_16_1      Interrupt(TIMER_16_1_IRQn)
-#define TIMER_32_0      Interrupt(TIMER_32_0_IRQn)
-#define TIMER_32_1      Interrupt(TIMER_32_1_IRQn)
+#define TIMER_16_0_IRQ  Interrupt(TIMER_16_0_IRQn)
+#define TIMER_16_1_IRQ  Interrupt(TIMER_16_1_IRQn)
+#define TIMER_32_0_IRQ  Interrupt(TIMER_32_0_IRQn)
+#define TIMER_32_1_IRQ  Interrupt(TIMER_32_1_IRQn)
 #define SSP0_IRQ        Interrupt(SSP0_IRQn)
 #define UART_IRQ        Interrupt(UART_IRQn)
 #define ADC_IRQ         Interrupt(ADC_IRQn)
