@@ -311,7 +311,6 @@ extern "C"
 void
 I2C_Handler()
 {
-    // this is a hack due to problems with etl::atomic store/fetch in no-STL mode
     if (I2C0._busy) {
         I2C0.handleInterrupt();
     } else {
