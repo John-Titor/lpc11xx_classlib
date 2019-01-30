@@ -6,7 +6,7 @@
 # Set SRCS to source files to be built.
 # Set PORT to a serial port to upload to.
 # Set INCLUDES to a list of include paths.
-# Set DEFINES to a list of symbols to define. Set scmRTOS_PROCESS_COUNT to enable scmRTOS.
+# Set DEFINES to a list of symbols to define.
 # Set LIBS with BIN to link additional libraries.
 # Set EXTRA_FMT_SRCS to reformat other source files (e.g. headers)
 #
@@ -16,6 +16,18 @@
 # upload	builds and uploads the binary if BIN was set
 # clean		cleans out the build directory
 # reformat	reformats $(SRCS) and $(EXTRA_FMT_SRCS)
+#
+# scmRTOS
+#
+# Thread main routines are main0..mainN for N+1 processes (max N is 8);
+#
+# Options in DEFINES:
+#
+# scmRTOS_PROCESS_COUNT		Set the number of processes. If 0, scmRTOS is not
+#				enabled and main() must be supplied.
+# scmRTOS_PROCn_STACKSIZE	Set the stack size for process 'n'. If not set,
+#				the default stack size will be used.
+# scmRTOS_DEFAULT_STACKSIZE	Set the default stack size, defaults to 512.
 #
 
 # Sanity-check variables
@@ -39,7 +51,18 @@ _LIBDIR		:= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 _OBJDIR		:= $(dir $(abspath $(BIN)))
 
 # Library sources
-SRCS           += $(wildcard $(_LIBDIR)src/*.cpp) $(wildcard $(_LIBDIR)src/*.c)
+_SRCDIRS	 = src 
+_INCDIRS	 = include \
+		   include/CMSIS \
+		   etl/include
+
+ifneq ($(findstring scmRTOS_PROCESS_COUNT,$(DEFINES)),)
+$(info WITH_SCMRTOS)
+_SRCDIRS	+= scmrtos/core \
+		   scmrtos/ext \
+		   scmrtos/port/cortex/mx-gcc
+_INCDIRS	+= scmrtos/core scmrtos/port/cortex/mx-gcc
+endif
 
 # Tools
 CC		 = arm-none-eabi-gcc
@@ -51,11 +74,10 @@ ASTYLE		 = astyle
 
 # Common compile arguments
 EXTRA_DEPS	+= $(MAKEFILE_LIST)
-INCLUDES	+= $(_LIBDIR)include \
-		   $(_LIBDIR)include/CMSIS \
-		   $(_LIBDIR)etl/include \
-		   $(_LIBDIR)scmrtos
+_INCLUDES	+= $(foreach dir,$(_INCDIRS),-I$(_LIBDIR)$(dir))
 DEFINES		+= $(CHIP)
+$(info _INCDIRS $(_INCDIRS))
+$(info _INCLUDES $(_INCLUDES))
 
 # Compiler options
 _ARCH_FLAGS	 = -march=armv6-m \
@@ -63,7 +85,7 @@ _ARCH_FLAGS	 = -march=armv6-m \
 		   -mcpu=cortex-m0plus
 
 _COMMON_FLAGS    = $(addprefix -D,$(DEFINES)) \
-		   $(addprefix -I,$(INCLUDES)) \
+		   $(_INCLUDES) \
 		   $(_ARCH_FLAGS) \
 		   -ffunction-sections \
 		   -fdata-sections \
@@ -83,23 +105,25 @@ _CXXFLAGS	 = -std=gnu++14 \
 		   -fno-rtti \
 		   $(CXXFLAGS)
 
-_LDFLAGS	= $(_ARCH_FLAGS) \
-		  -nostartfiles \
-		  -Wl,-gc-sections \
-		  -Wl,-flto \
-		  -L/usr/local/arm-none-eabi/lib \
-		  -L$(_LIBDIR) \
-		  -Wl,-Map,$@.map \
-		  --specs=nano.specs \
-		  $(LIBS) \
-		  -lgcc \
-		  $(LDFLAGS)
+_LDFLAGS	 = $(_ARCH_FLAGS) \
+		   -nostartfiles \
+		   -Wl,-gc-sections \
+		   -Wl,-flto \
+		   -L/usr/local/arm-none-eabi/lib \
+		   -L$(_LIBDIR) \
+		   -Wl,-Map,$@.map \
+		   --specs=nano.specs \
+		   $(LIBS) \
+		   -lgcc \
+		   $(LDFLAGS)
 
 
 _ELF		 = $(BIN:.bin=.elf)
 _LDSCRIPT	 = $(_LIBDIR)$(CHIP).ld
 _OBJS		 = $(foreach src,$(SRCS),$(_OBJDIR)$(src).o)
 _DEPS		 = $(_OBJS:.o=.d)
+
+SRCS           	+= $(foreach dir,$(_SRCDIRS),$(wildcard $(_LIBDIR)$(dir)/*.cpp) $(wildcard $(_LIBDIR)$(dir)/*.c))
 
 #$(info SRCS $(notdir $(SRCS)))
 #$(info OBJS $(notdir $(_OBJS)))

@@ -15,7 +15,7 @@ callback(void)
 }
 
 void
-main()
+main0()
 {
     Timebase(0).configure();
 

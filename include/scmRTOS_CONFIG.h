@@ -18,11 +18,7 @@ typedef uint_fast32_t tick_count_t;
 #   define scmRTOS_IDLE_PROCESS_STACK_SIZE     (50 * sizeof(stack_item_t))  // min is 20*
 #endif
 
-// Options we might want to make overrideable
-//
-#define scmRTOS_IDLE_HOOK_ENABLE                0
-
-// Options not worth changing
+#define scmRTOS_IDLE_HOOK_ENABLE                1
 #define scmRTOS_SYSTIMER_NEST_INTS_ENABLE       1
 #define scmRTOS_SYSTEM_TICKS_ENABLE             1
 #define scmRTOS_SYSTIMER_HOOK_ENABLE            1
