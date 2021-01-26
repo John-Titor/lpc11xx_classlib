@@ -33,7 +33,7 @@
 class Pin
 {
 public:
-    enum Modifier_t : uint32_t {
+    enum Modifier : uint32_t {
 
         // MODE
         NoPull      = (0U << 3),
@@ -164,7 +164,7 @@ public:
 
 };
 
-#define P0_0_nRESET         Pin(&LPC_IOCON->RESET_PIO0_0, 0 | Sysctl::PULL_UP)
+#define P0_0_nRESET         Pin(&LPC_IOCON->RESET_PIO0_0, 0 | Pin::PULL_UP)
 #define P0_0                Gpio(0, 0, &LPC_IOCON->RESET_PIO0_0, 1)
 
 #define P0_1                Gpio(0, 1, &LPC_IOCON->PIO0_1, 0)
@@ -177,10 +177,10 @@ public:
 
 #define P0_3                Gpio(0, 3, &LPC_IOCON->PIO0_3, 0)
 
-#define P0_4                Gpio(0, 4, &LPC_IOCON->PIO0_4, 0 | Sysctl::I2CModeNone)
+#define P0_4                Gpio(0, 4, &LPC_IOCON->PIO0_4, 0 | Pin::I2CModeNone)
 #define P0_4_SCL            Pin(&LPC_IOCON->PIO0_4, 1)
 
-#define P0_5                Gpio(0, 5, &LPC_IOCON->PIO0_5, 0 | Sysctl::I2CModeNone)
+#define P0_5                Gpio(0, 5, &LPC_IOCON->PIO0_5, 0 | Pin::I2CModeNone)
 #define P0_5_SDA            Pin(&LPC_IOCON->PIO0_5, 1)
 
 #define P0_6                Gpio(0, 6, &LPC_IOCON->PIO0_6, 0)
@@ -202,30 +202,30 @@ public:
 #define P0_10_SCK0          Pin(&LPC_IOCON->SWCLK_PIO0_10, 2, &LPC_IOCON->SCK_LOC, 0)
 #define P0_10_CT16B0_MAT2   Pin(&LPC_IOCON->SWCLK_PIO0_10, 3)
 
-#define P0_11               Gpio(0, 11, &LPC_IOCON->R_PIO0_11, 1 | Sysctl::Digital)
-#define P0_11_AD0           Pin(&LPC_IOCON->R_PIO0_11, 2 | Sysctl::Analog)
-#define P0_11_CT32B0_MAT3   Pin(&LPC_IOCON->R_PIO0_11, 3 | Sysctl::Digital)
+#define P0_11               Gpio(0, 11, &LPC_IOCON->R_PIO0_11, 1 | Pin::Digital)
+#define P0_11_AD0           Pin(&LPC_IOCON->R_PIO0_11, 2 | Pin::Analog)
+#define P0_11_CT32B0_MAT3   Pin(&LPC_IOCON->R_PIO0_11, 3 | Pin::Digital)
 
-#define P1_0                Gpio(1, 0, &LPC_IOCON->PIO1_0, 1 | Sysctl::Digital)
-#define P1_0_AD1            Pin(&LPC_IOCON->PIO1_0, 2 | Sysctl::Analog)
-#define P1_0_CT32B1_CAP0    Pin(&LPC_IOCON->PIO1_0, 3 | Sysctl::Digital)
+#define P1_0                Gpio(1, 0, &LPC_IOCON->PIO1_0, 1 | Pin::Digital)
+#define P1_0_AD1            Pin(&LPC_IOCON->PIO1_0, 2 | Pin::Analog)
+#define P1_0_CT32B1_CAP0    Pin(&LPC_IOCON->PIO1_0, 3 | Pin::Digital)
 
-#define P1_1                Gpio(1, 1, &LPC_IOCON->PIO1_1, 1 | Sysctl::Digital)
-#define P1_1_AD2            Pin(&LPC_IOCON->PIO1_1, 2 | Sysctl::Analog)
-#define P1_1_CT32B1_MAT0    Pin(&LPC_IOCON->PIO1_1, 3 | Sysctl::Digital)
+#define P1_1                Gpio(1, 1, &LPC_IOCON->PIO1_1, 1 | Pin::Digital)
+#define P1_1_AD2            Pin(&LPC_IOCON->PIO1_1, 2 | Pin::Analog)
+#define P1_1_CT32B1_MAT0    Pin(&LPC_IOCON->PIO1_1, 3 | Pin::Digital)
 
-#define P1_2                Gpio(1, 2, &LPC_IOCON->PIO1_2, 1 | Sysctl::Digital)
-#define P1_2_AD3            Pin(&LPC_IOCON->PIO1_2, 2 | Sysctl::Analog)
-#define P1_2_CT32B1_MAT1    Pin(&LPC_IOCON->PIO1_2, 3 | Sysctl::Digital)
+#define P1_2                Gpio(1, 2, &LPC_IOCON->PIO1_2, 1 | Pin::Digital)
+#define P1_2_AD3            Pin(&LPC_IOCON->PIO1_2, 2 | Pin::Analog)
+#define P1_2_CT32B1_MAT1    Pin(&LPC_IOCON->PIO1_2, 3 | Pin::Digital)
 
-#define P1_3                Gpio(1, 3, &LPC_IOCON->SWDIO_PIO1_3, 1 | Sysctl::Digital)
-#define P1_3_SWDIO          Pin(&LPC_IOCON->SWDIO_PIO1_3, 0 | Sysctl::Digital)
-#define P1_3_AD4            Pin(&LPC_IOCON->SWDIO_PIO1_3, 2 | Sysctl::Analog)
-#define P1_3_CT32B1_MAT2    Pin(&LPC_IOCON->SWDIO_PIO1_3, 3 | Sysctl::Digital)
+#define P1_3                Gpio(1, 3, &LPC_IOCON->SWDIO_PIO1_3, 1 | Pin::Digital)
+#define P1_3_SWDIO          Pin(&LPC_IOCON->SWDIO_PIO1_3, 0 | Pin::Digital)
+#define P1_3_AD4            Pin(&LPC_IOCON->SWDIO_PIO1_3, 2 | Pin::Analog)
+#define P1_3_CT32B1_MAT2    Pin(&LPC_IOCON->SWDIO_PIO1_3, 3 | Pin::Digital)
 
-#define P1_4                Gpio(1, 4, &LPC_IOCON->PIO1_4, 0 | Sysctl::Digital)
-#define P1_4_AD5            Pin(&LPC_IOCON->PIO1_4, 1 | Sysctl::Analog)
-#define P1_4_CT32B1_MAT3    Pin(&LPC_IOCON->PIO1_4, 2 | Sysctl::Digital)
+#define P1_4                Gpio(1, 4, &LPC_IOCON->PIO1_4, 0 | Pin::Digital)
+#define P1_4_AD5            Pin(&LPC_IOCON->PIO1_4, 1 | Pin::Analog)
+#define P1_4_CT32B1_MAT3    Pin(&LPC_IOCON->PIO1_4, 2 | Pin::Digital)
 
 #define P1_5                Gpio(1, 5, &LPC_IOCON->PIO1_5, 0)
 #define P1_5_nRTS           Pin(&LPC_IOCON->PIO1_5, 1)
@@ -246,14 +246,14 @@ public:
 #define P1_9_CT16B1_MAT0    Pin(&LPC_IOCON->PIO1_9, 1)
 #define P1_9_MOSI1          in(&LPC_IOCON->PIO1_9, 2, &LPC_IOCON->MOSI1_LOC, 1)
 
-#define P1_10               Gpio(1, 10, &LPC_IOCON->PIO1_10, 0 | Sysctl::Digital)
-#define P1_10_AD6           Pin(&LPC_IOCON->PIO1_10, 1 | Sysctl::Analog)
-#define P1_10_CT16B1_MAT1   Pin(&LPC_IOCON->PIO1_10, 2 | Sysctl::Digital)
-#define P1_10_MISO1         Pin(&LPC_IOCON->PIO1_10, 3 | Sysctl::Digital, &LPC_IOCON->MIS01_LOC, 1)
+#define P1_10               Gpio(1, 10, &LPC_IOCON->PIO1_10, 0 | Pin::Digital)
+#define P1_10_AD6           Pin(&LPC_IOCON->PIO1_10, 1 | Pin::Analog)
+#define P1_10_CT16B1_MAT1   Pin(&LPC_IOCON->PIO1_10, 2 | Pin::Digital)
+#define P1_10_MISO1         Pin(&LPC_IOCON->PIO1_10, 3 | Pin::Digital, &LPC_IOCON->MIS01_LOC, 1)
 
-#define P1_11               Gpio(1, 11, &LPC_IOCON->PIO1_11, 0 | Sysctl::Digital)
-#define P1_11_AD7           Pin(&LPC_IOCON->PIO1_11, 1 | Sysctl::Analog)
-#define P1_11_CT32B1_CAP1   Pin(&LPC_IOCON->PIO1_11, 2 | Sysctl::Digital)
+#define P1_11               Gpio(1, 11, &LPC_IOCON->PIO1_11, 0 | Pin::Digital)
+#define P1_11_AD7           Pin(&LPC_IOCON->PIO1_11, 1 | Pin::Analog)
+#define P1_11_CT32B1_CAP1   Pin(&LPC_IOCON->PIO1_11, 2 | Pin::Digital)
 
 #define P2_0                Gpio(2, 0, &LPC_IOCON->PIO2_0, 0)
 #define P2_0_nDTR           Pin(&LPC_IOCON->PIO2_0, 1)
