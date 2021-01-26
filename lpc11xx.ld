@@ -48,7 +48,9 @@ SECTIONS {
         *(COMMON)
         . = ALIGN(4);
         PROVIDE(_bss_end = .);
-    } > ram    
+    } > ram
 
+    PROVIDE(_end = .);
     PROVIDE(_stacktop = ORIGIN(ram) + LENGTH(ram) - 16);
+    PROVIDE(__dso_handle = 0);
 }
