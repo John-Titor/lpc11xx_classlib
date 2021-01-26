@@ -27,6 +27,7 @@
 #include <timer.h>
 #include <syscon.h>
 #include <interrupt.h>
+#include <uart.h>
 
 Timer::Callback Timer::_callbacks[4];
 
@@ -50,6 +51,7 @@ Timer::cancel()
 void
 Timer::handler(unsigned index)
 {
+//    UART_POLLED << 'T';
     if (_callbacks[index] != nullptr) {
         _callbacks[index](index);
     } else {
@@ -58,10 +60,10 @@ Timer::handler(unsigned index)
 }
 
 extern "C" {
-    void CT16_0_IRQHandler() { Timer::handler(0); }
-    void CT16_1_IRQHandler() { Timer::handler(1); }
-    void CT32_0_IRQHandler() { Timer::handler(2); }
-    void CT32_1_IRQHandler() { Timer::handler(3); }
+    void TIMER_16_0_Handler() { Timer::handler(0); }
+    void TIMER_16_1_Handler() { Timer::handler(1); }
+    void TIMER_32_0_Handler() { Timer::handler(2); }
+    void TIMER_32_1_Handler() { Timer::handler(3); }
 }
 
 uint64_t        Timebase::_time;
@@ -73,11 +75,12 @@ Timebase::configure()
     _time = 0;
     _regs.CTCR = CTCR_CTMODE_TIMER;
     _regs.PR = (Syscon::PCLK_FREQ / 1000000) - 1;        // count microseconds
-    _regs.MR0 = 0xffffffff;                              // interrupt around about wrap time
-    _regs.MR1 = 0x8000;                                  // and again at ~halftime for a 16-bit timer
+    _regs.MR0 = max_count();                             // interrupt around about wrap time
+    _regs.MR1 = max_count() / 2;                         // and again at ~halftime
     _regs.MCR = MCR_MR0_INT_ENABLED | MCR_MR1_INT_ENABLED;
     _callbacks[_index] = &Timebase::handler;
     _regs.TCR = TCR_COUNTERENABLE_ENABLED | TCR_COUNTERRESET_DISABLED;
+    _irq.enable();
 }
 
 uint64_t

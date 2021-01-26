@@ -27,7 +27,8 @@
 #pragma once
 
 #include <LPC11xx.h>
-#include "_compiler.h"
+
+#include "interrupt.h"
 #include "syscon.h"
 
 extern "C" void CT16_0_IRQHandler();
@@ -47,10 +48,14 @@ public:
               (index == 2) ? * LPC_TMR32B0 : * LPC_TMR32B1),
         _syscon((index == 0) ? SYSCON_CT16B0 :
                 (index == 1) ? SYSCON_CT16B1 :
-                (index == 2) ? SYSCON_CT32B0 : SYSCON_CT32B1)
+                (index == 2) ? SYSCON_CT32B0 : SYSCON_CT32B1),
+        _irq((index == 0) ? TIMER_16_0_IRQ :
+             (index == 1) ? TIMER_16_1_IRQ :
+             (index == 2) ? TIMER_32_0_IRQ : TIMER_32_1_IRQ)
     {}
 
     void                cancel();
+    uint32_t            max_count() { return (_index < 2) ? 0xffff : 0xffffffff; }
 
     static void         handler(unsigned index);
 
@@ -60,7 +65,7 @@ protected:
     const unsigned      _index;
     LPC_TMR_TypeDef     &_regs;
     Syscon              _syscon;
-
+    Interrupt           _irq;
 
     enum IR : uint32_t {
         IR_MR0_MASK                 = 0x00000001, // Interrupt flag for match channel 0
@@ -196,17 +201,19 @@ protected:
 class Timebase : public Timer
 {
 public:
+    typedef uint64_t    microseconds;
+
     constexpr Timebase(unsigned index) :
         Timer(index)
     {}
 
-    void        configure();
-    uint64_t    time();
+    void                configure();
+    microseconds        time();
 
 private:
-    static uint64_t    _time;
+    static microseconds _time;
 
-    static void handler(unsigned index);
+    static void         handler(unsigned index);
 };
 
 

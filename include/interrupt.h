@@ -103,3 +103,36 @@ private:
 #define EINT2_IRQ       Interrupt(EINT2_IRQn)
 #define EINT1_IRQ       Interrupt(EINT1_IRQn)
 #define EINT0_IRQ       Interrupt(EINT0_IRQn)
+
+extern "C" {
+    void WAKEUP0_Handler(void);
+    void WAKEUP1_Handler(void);
+    void WAKEUP2_Handler(void);
+    void WAKEUP3_Handler(void);
+    void WAKEUP4_Handler(void);
+    void WAKEUP5_Handler(void);
+    void WAKEUP6_Handler(void);
+    void WAKEUP7_Handler(void);
+    void WAKEUP8_Handler(void);
+    void WAKEUP9_Handler(void);
+    void WAKEUP10_Handler(void);
+    void WAKEUP11_Handler(void);
+    void WAKEUP12_Handler(void);
+    void CAN_Handler(void);
+    void SSP1_Handler(void);
+    void I2C_Handler(void);
+    void TIMER_16_0_Handler(void);
+    void TIMER_16_1_Handler(void);
+    void TIMER_32_0_Handler(void);
+    void TIMER_32_1_Handler(void);
+    void SSP0_Handler(void);
+    void UART_Handler(void);
+    void ADC_Handler(void);
+    void WDT_Handler(void);
+    void BOD_Handler(void);
+    void FMC_Handler(void);
+    void EINT3_Handler(void);
+    void EINT2_Handler(void);
+    void EINT1_Handler(void);
+    void EINT0_Handler(void);
+}
