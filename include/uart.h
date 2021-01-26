@@ -26,42 +26,37 @@
 
 #pragma once
 
-#include <sys/cdefs.h>
-
+#include <config.h>
+//#include <sys/cdefs.h>
 #include <LPC11xx.h>
+#include <etl/string.h>
 
-#include <etl/cstring.h>
-
+#include "interrupt.h"
 #include "syscon.h"
 
-class UART
+class _UART
 {
 public:
-    constexpr UART() {}
+    constexpr _UART(bool polled = false) :
+        _polled(polled),
+        _irq(UART_IRQ)
+    {}
 
-    UART &configure(unsigned rate);
+    const _UART &configure(unsigned rate) const;
 
     __always_inline void send(uint8_t c) const
     {
-        while (!txidle()) {}
-
-        LPC_UART->THR = c;
-    }
-
-    __always_inline bool recv(unsigned &c) const
-    {
-        if (rxready()) {
-            c = LPC_UART->RBR;
-            return true;
+        if (_polled) {
+            while (!txidle()) {}
+            LPC_UART->THR = c;
+        } else {
+            async_send(c);
         }
-
-        return false;
     }
 
-    __always_inline bool discard() const
+    __always_inline bool recv(uint8_t &c) const
     {
-        unsigned c;
-        return recv(c);
+        return async_recv(c);
     }
 
     __always_inline bool rxready() const { return LPC_UART->LSR & LSR_RDR_DATA; }
@@ -69,19 +64,19 @@ public:
     __always_inline bool txidle()  const { return LPC_UART->LSR & LSR_TEMT; }
 
 
-    __always_inline const UART &operator << (uint8_t c) const
+    __always_inline const _UART &operator << (uint8_t c) const
     {
         send(c);
         return *this;
     }
 
-    __always_inline const UART &operator << (char c) const
+    __always_inline const _UART &operator << (char c) const
     {
         send(c);
         return *this;
     }
 
-    __always_inline const UART &operator << (const char *s) const
+    __always_inline const _UART &operator << (const char *s) const
     {
         while (*s != '\0') {
             send(*s++);
@@ -90,7 +85,7 @@ public:
         return *this;
     }
 
-    __always_inline const UART &operator << (const etl::istring s) const
+    __always_inline const _UART &operator << (const etl::istring s) const
     {
         auto iter = s.begin();
 
@@ -101,7 +96,7 @@ public:
         return *this;
     }
 
-    const UART &operator << (unsigned val) const
+    const _UART &operator << (unsigned val) const
     {
         for (int shift = 28; shift >= 0; shift -= 4) {
             unsigned n = (val >> shift) & 0xf;
@@ -120,6 +115,7 @@ public:
     }
 
 private:
+    friend void UART_Handler(void);
 
     enum IER : uint32_t {
         IER_RBR_Interrupt_MASK                  = 0x00000001, // Enables the received data available interrupt
@@ -141,8 +137,8 @@ private:
 
     enum IIR : uint32_t {
         IIR_IntStatus_MASK                      = 0x00000001, // Interrupt status
-        IIR_IntStatus_InterruptPending          = 0x00000001,
-        IIR_IntStatus_NoInterruptPending        = 0x00000000,
+        IIR_IntStatus_InterruptPending          = 0x00000000,
+        IIR_IntStatus_NoInterruptPending        = 0x00000001,
         IIR_IntId_MASK                          = 0x0000000E, // Interrupt identification
         IIR_IntId_RLS                           = 0x00000006, // Receive line status
         IIR_IntId_RDA                           = 0x00000004, // Receive data available
@@ -305,7 +301,14 @@ private:
         FIFOLVL_TXFIFOLVL_Full                  = 0x00000F00,
     };
 
-    void            set_divisors(uint32_t rate);
+    const bool      _polled;
+    const Interrupt _irq;
+
+    void            set_divisors(uint32_t rate) const;
+    void            async_send(uint8_t c) const;
+    bool            async_recv(uint8_t &c) const;
+    void            interrupt(void) const;
 };
 
-#define UART0   UART()
+#define UART        _UART()
+#define UART_POLLED _UART(true)

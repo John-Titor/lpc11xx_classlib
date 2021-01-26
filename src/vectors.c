@@ -32,7 +32,7 @@ extern uint8_t _stacktop;
 // From startup.cpp
 extern void _start(void);
 
-static void _badhandler(void) { for (;;) {} }
+static void _badhandler(void) { for (;;) { LPC_UART->THR = 'X'; } }
 
 void NonMaskableInt_Handler(void)   __attribute__((weak, alias("_badhandler")));
 void HardFault_Handler(void)        __attribute__((weak, alias("_badhandler")));
@@ -52,6 +52,7 @@ void WAKEUP9_Handler(void)          __attribute__((weak, alias("_badhandler")));
 void WAKEUP10_Handler(void)         __attribute__((weak, alias("_badhandler")));
 void WAKEUP11_Handler(void)         __attribute__((weak, alias("_badhandler")));
 void WAKEUP12_Handler(void)         __attribute__((weak, alias("_badhandler")));
+void CAN_Handler(void)              __attribute__((weak, alias("_badhandler")));
 void SSP1_Handler(void)             __attribute__((weak, alias("_badhandler")));
 void I2C_Handler(void)              __attribute__((weak, alias("_badhandler")));
 void TIMER_16_0_Handler(void)       __attribute__((weak, alias("_badhandler")));
@@ -90,6 +91,7 @@ void (*_vectors[])() = {
     [16 + WAKEUP10_IRQn]        = WAKEUP10_Handler,
     [16 + WAKEUP11_IRQn]        = WAKEUP11_Handler,
     [16 + WAKEUP12_IRQn]        = WAKEUP12_Handler,
+    [16 + CAN_IRQn]             = CAN_Handler,
     [16 + SSP1_IRQn]            = SSP1_Handler,
     [16 + I2C_IRQn]             = I2C_Handler,
     [16 + TIMER_16_0_IRQn]      = TIMER_16_0_Handler,

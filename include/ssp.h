@@ -27,7 +27,6 @@
 #pragma once
 
 #include <LPC11xx.h>
-#include "_compiler.h"
 #include "syscon.h"
 
 class SSP

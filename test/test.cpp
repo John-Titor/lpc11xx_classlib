@@ -45,11 +45,11 @@ main0()
     // print some stuff
     P1_7_TXD.configure();
     P1_6_RXD.configure();
-    UART0.configure(115200);
+    UART.configure(115200);
 
-    UART0 << 'X' << "test string";
+    UART << 'X' << "test string";
     for (;;) {
-        UART0.send('A');
+        UART.send('A');
         P0_2.toggle();
     }
 }

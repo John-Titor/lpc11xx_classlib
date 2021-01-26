@@ -24,10 +24,22 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <etl/queue_spsc_atomic.h>
+
 #include "uart.h"
 
-UART &
-UART::configure(unsigned rate)
+namespace {
+    etl::queue_spsc_atomic<uint8_t,
+                           CONFIG_UART_TX_BUFFER,
+                           etl::memory_model::MEMORY_MODEL_SMALL> tx_queue;
+
+    etl::queue_spsc_atomic<uint8_t,
+                           CONFIG_UART_RX_BUFFER,
+                           etl::memory_model::MEMORY_MODEL_SMALL> rx_queue;
+};
+
+const _UART &
+_UART::configure(unsigned rate) const
 {
     Syscon::set_uart_prescale(1);           // start UART clock & set 1:1 divisor
     LPC_UART->IER = 0;                      // disable interrupts
@@ -41,13 +53,15 @@ UART::configure(unsigned rate)
     set_divisors(rate);
     LPC_UART->ACR = 0;
     LPC_UART->TER = TER_TXEN_Enabled;
+    LPC_UART->IER = IER_RBR_Interrupt_Enabled;  // enable RX interrupts
+    _irq.enable();
 
     return *this;
 }
 
 // fractional divider logic from LPCOpen 2.00a
 void
-UART::set_divisors(uint32_t rate)
+_UART::set_divisors(uint32_t rate) const
 {
     uint32_t dval, mval;
     uint32_t dl;
@@ -89,4 +103,54 @@ UART::set_divisors(uint32_t rate)
     LPC_UART->DLM = dl >> 8;
     LPC_UART->LCR &= ~LCR_Divisor_Latch_Access_Enabled;
     LPC_UART->FDR = (mval << 4) | dval;
+}
+
+void
+_UART::async_send(uint8_t c) const
+{
+    // XXX queue-full case?
+    tx_queue.push(c);
+
+    // If the transmit interrupt is disabled, the transmit path 
+    // is idle. Stuff a byte into the THR and re-enable the THR interrupt.
+    if ((LPC_UART->IER & IER_THRE_Interrupt_MASK) == IER_THRE_Interrupt_Disabled) {
+        tx_queue.pop(c);
+        LPC_UART->THR = c;
+        LPC_UART->IER |= IER_THRE_Interrupt_Enabled;
+    }
+}
+
+bool
+_UART::async_recv(uint8_t &c) const
+{
+    return rx_queue.pop(c);
+}
+
+void
+_UART::interrupt(void) const
+{
+    // receive any available bytes
+    while (LPC_UART->LSR & LSR_RDR_DATA) {
+        // we're going to drop bytes here; if we wanted
+        // to implement flow control we'd want to check
+        // the rx_queue and mask the interrupt...
+        rx_queue.push(LPC_UART->RBR);        
+    }
+
+    // send any available bytes we have space for
+    uint8_t c;
+    while ((LPC_UART->LSR & LSR_THRE)
+           && (tx_queue.pop(c))) {
+        LPC_UART->THR = c;
+    }
+    // if we've run out of data to send, mask the interrupt
+    if (tx_queue.empty()) {
+        LPC_UART->IER &= ~IER_THRE_Interrupt_Enabled;
+    }
+}
+
+void
+UART_Handler(void)
+{
+    UART.interrupt();
 }
