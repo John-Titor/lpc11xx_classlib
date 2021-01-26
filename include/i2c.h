@@ -53,7 +53,7 @@ public:
     };
 
     State                    transfer(uint8_t slave,
-                                      const uint8_t *writeBuffer,
+                                      uint8_t *writeBuffer,
                                       uint8_t writeLength,
                                       uint8_t *readBuffer = nullptr,
                                       uint8_t readLength = 0);
@@ -85,8 +85,8 @@ private:
 
     State                                           _state = IDLE;
     uint8_t                                         _slave = 0;
-    etl::const_array_view<uint8_t>                  _writeBuffer;
-    etl::const_array_view<uint8_t>::const_iterator  _writeIter;
+    etl::array_view<uint8_t>                        _writeBuffer;
+    etl::array_view<uint8_t>::iterator              _writeIter;
     etl::array_view<uint8_t>                        _readBuffer;
     etl::array_view<uint8_t>::iterator              _readIter;
 

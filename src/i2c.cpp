@@ -35,7 +35,7 @@ I2C     I2C0;
 
 I2C::State
 I2C::transfer(uint8_t slave,
-              const uint8_t *writeBuffer,
+              uint8_t *writeBuffer,
               uint8_t writeLength,
               uint8_t *readBuffer,
               uint8_t readLength)
@@ -49,7 +49,7 @@ I2C::transfer(uint8_t slave,
     _state = IDLE;
     _slave = slave;
     
-    _writeBuffer = etl::const_array_view<unsigned char>(writeBuffer, writeLength);
+    _writeBuffer = etl::array_view<unsigned char>(writeBuffer, writeLength);
     _writeIter = _writeBuffer.begin();
 
     _readBuffer = etl::array_view<unsigned char>(readBuffer, readLength);
