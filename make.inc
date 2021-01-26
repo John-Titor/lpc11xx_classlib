@@ -80,9 +80,7 @@ DEFINES		+= $(CHIP)
 #$(info _INCLUDES $(_INCLUDES))
 
 # Compiler options
-_ARCH_FLAGS	 = -march=armv6-m \
-		   -mthumb \
-		   -mcpu=cortex-m0plus
+_ARCH_FLAGS	 = -mcpu=cortex-m0
 
 _COMMON_FLAGS    = $(addprefix -D,$(DEFINES)) \
 		   $(_INCLUDES) \
