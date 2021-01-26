@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Michael Smith, All Rights Reserved
+// Copyright (c) 2021 Michael Smith, All Rights Reserved
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
@@ -23,11 +23,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-
 #pragma once
 
-#define CONFIG_CPU_FREQUENCY        (48 * 1000 * 1000)
-#define CONFIG_UART_TX_BUFFER		128
-#define CONFIG_UART_RX_BUFFER		32
-#define CONFIG_CAN_TX_QUEUE_SIZE	2
-#define CONFIG_CAN_RX_QUEUE_SIZE	4
+// debug tracing
+#include <stdio.h>
+
+#define debug(fmt, args...)		fprintf(stderr, fmt "\n", ##args)
