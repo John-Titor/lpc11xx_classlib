@@ -113,6 +113,7 @@ _LDFLAGS	 = $(_ARCH_FLAGS) \
 		   -L$(_LIBDIR) \
 		   -Wl,-Map,$@.map \
 		   --specs=nano.specs \
+		   -latomic \
 		   $(LIBS) \
 		   $(LDFLAGS)
 

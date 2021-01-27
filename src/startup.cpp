@@ -24,8 +24,9 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <LPC11xx.h>
+#include <etl.h>
 #include <syscon.h>
+#include <timer.h>
 
 // Symbols from linker script.
 typedef void (*funcp_t)();
@@ -38,8 +39,8 @@ extern funcp_t _init_array_start;
 extern funcp_t _init_array_end;
 
 extern "C" void main() __attribute__((noreturn));
-
 extern "C" void _board_init(void) {}
+
 void board_init(void) __attribute__((weak, alias("_board_init")));
 
 extern "C"
@@ -78,8 +79,14 @@ _start()
         (*fp)();
     }
 
+    // initialize the timebase
+    Timebase.configure();
+
     // call the board init hook
     board_init();
+
+    // configure the ETL infrastructure
+    ETL::init();
 
     // run the app
     main();

@@ -30,46 +30,10 @@
 #include <uart.h>
 
 Timer::Callback Timer::_callbacks[4];
+uint64_t        _Timebase::_time;
 
 void
-Timer::cancel()
-{
-    _regs.TCR = TCR_COUNTERENABLE_DISABLED | TCR_COUNTERRESET_ENABLED;
-    _regs.IR = 0;
-    _regs.MR0 = 0;
-    _regs.MR1 = 0;
-    _regs.MR2 = 0;
-    _regs.MR3 = 0;
-    _regs.CCR = 0;
-    _regs.EMR = 0;
-    _regs.CTCR = 0;
-    _regs.PWMC = 0;
-    _callbacks[_index] = nullptr;
-}
-
-
-void
-Timer::handler(unsigned index)
-{
-//    UART_POLLED << 'T';
-    if (_callbacks[index] != nullptr) {
-        _callbacks[index](index);
-    } else {
-        Timer(index).cancel();
-    }
-}
-
-extern "C" {
-    void TIMER_16_0_Handler() { Timer::handler(0); }
-    void TIMER_16_1_Handler() { Timer::handler(1); }
-    void TIMER_32_0_Handler() { Timer::handler(2); }
-    void TIMER_32_1_Handler() { Timer::handler(3); }
-}
-
-uint64_t        Timebase::_time;
-
-void
-Timebase::configure()
+_Timebase::configure()
 {
     cancel();
     _time = 0;
@@ -78,13 +42,13 @@ Timebase::configure()
     _regs.MR0 = max_count();                             // interrupt around about wrap time
     _regs.MR1 = max_count() / 2;                         // and again at ~halftime
     _regs.MCR = MCR_MR0_INT_ENABLED | MCR_MR1_INT_ENABLED;
-    _callbacks[_index] = &Timebase::handler;
+    _callbacks[_index] = &_Timebase::handler;
     _regs.TCR = TCR_COUNTERENABLE_ENABLED | TCR_COUNTERRESET_DISABLED;
     _irq.enable();
 }
 
 uint64_t
-Timebase::time()
+_Timebase::time()
 {
     BEGIN_CRITICAL_SECTION;
 
@@ -114,8 +78,31 @@ Timebase::time()
 }
 
 void
-Timebase::handler(unsigned index)
+_Timebase::handler(unsigned index)
 {
-    Timebase(index).time();
+    _Timebase(index).time();
 }
 
+void
+TIMER_16_0_Handler(void)
+{
+    Timer(0).interrupt();
+}
+
+void
+TIMER_16_1_Handler(void)
+{
+    Timer(1).interrupt();
+}
+
+void
+TIMER_32_0_Handler(void)
+{
+    Timer(2).interrupt();
+}
+
+void
+TIMER_32_1_Handler(void)
+{
+    Timer(3).interrupt();
+}

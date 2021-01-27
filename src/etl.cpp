@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Michael Smith, All Rights Reserved
+// Copyright (c) 2021 Michael Smith, All Rights Reserved
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
@@ -24,16 +24,47 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#pragma once
+#include <interrupt.h>
+#include <etl.h>
 
-#define CONFIG_CPU_FREQUENCY        (48 * 1000 * 1000)
+namespace ETL {
 
-#define CONFIG_UART_TX_BUFFER		128
-#define CONFIG_UART_RX_BUFFER		32
+	void
+	init(void)
+	{
+		// configure SysTick for 1ms interval tick.
+		SysTick_Config(CONFIG_CPU_FREQUENCY / 1000);
 
-#define CONFIG_CAN_TX_QUEUE_SIZE	2
-#define CONFIG_CAN_RX_QUEUE_SIZE	4
+#if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
+		callback_timer.enable(true);
+#endif
 
-#define CONFIG_TIMEBASE_TIMER		0
+	}
 
-#define CONFIG_ETL_NUM_CALLBACK_TIMERS	4
+	void
+	millisecond_tick()
+	{
+#if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
+		static uint32_t callback_ticks_elapsed = 0;
+
+		if (callback_timer.tick(++callback_ticks_elapsed)) {
+			callback_ticks_elapsed = 0;
+		}
+#endif
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
+	// callback timers
+	//
+	#if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
+	etl::callback_timer<CONFIG_ETL_NUM_CALLBACK_TIMERS>	callback_timer;
+	#endif // CONFIG_ETL_NUM_CALLBACK_TIMERS
+
+
+};
+
+void
+SysTick_Handler()
+{
+	ETL::millisecond_tick();
+}

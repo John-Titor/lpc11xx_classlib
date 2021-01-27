@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Michael Smith, All Rights Reserved
+// Copyright (c) 2021 Michael Smith, All Rights Reserved
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
@@ -26,14 +26,18 @@
 
 #pragma once
 
-#define CONFIG_CPU_FREQUENCY        (48 * 1000 * 1000)
+// ETL wrappers and support
 
-#define CONFIG_UART_TX_BUFFER		128
-#define CONFIG_UART_RX_BUFFER		32
+#include "config.h"
 
-#define CONFIG_CAN_TX_QUEUE_SIZE	2
-#define CONFIG_CAN_RX_QUEUE_SIZE	4
+#include <etl/callback_timer.h>
 
-#define CONFIG_TIMEBASE_TIMER		0
+namespace ETL {
 
-#define CONFIG_ETL_NUM_CALLBACK_TIMERS	4
+	void init(void);
+
+	#if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
+	extern etl::callback_timer<CONFIG_ETL_NUM_CALLBACK_TIMERS>	callback_timer;
+	#endif
+
+};

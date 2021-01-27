@@ -26,6 +26,8 @@
 
 #pragma once
 
+// Hardware timers and timebase.
+
 #include <LPC11xx.h>
 
 #include "interrupt.h"
@@ -54,12 +56,29 @@ public:
              (index == 2) ? TIMER_32_0_IRQ : TIMER_32_1_IRQ)
     {}
 
-    void                cancel();
+    void                cancel()
+    {
+        _regs.TCR = TCR_COUNTERENABLE_DISABLED | TCR_COUNTERRESET_ENABLED;
+        _regs.IR = 0;
+        _regs.MR0 = 0;
+        _regs.MR1 = 0;
+        _regs.MR2 = 0;
+        _regs.MR3 = 0;
+        _regs.CCR = 0;
+        _regs.EMR = 0;
+        _regs.CTCR = 0;
+        _regs.PWMC = 0;
+        _callbacks[_index] = nullptr;
+    }
+
     uint32_t            max_count() { return (_index < 2) ? 0xffff : 0xffffffff; }
 
-    static void         handler(unsigned index);
-
 protected:
+    friend void         TIMER_16_0_Handler(void);
+    friend void         TIMER_16_1_Handler(void);
+    friend void         TIMER_32_0_Handler(void);
+    friend void         TIMER_32_1_Handler(void);
+
     static Callback     _callbacks[4];
 
     const unsigned      _index;
@@ -196,14 +215,24 @@ protected:
         PWMC_PWM3_ENABLED           = 0x00000008,
         PWMC_PWM3_DISABLED          = 0x00000000,
     };
+
+    void                interrupt(void)
+    {
+        if (_callbacks[_index]) {
+            _callbacks[_index](_index);
+        } else {
+            cancel();
+        }
+    }
+
 };
 
-class Timebase : public Timer
+class _Timebase : public Timer
 {
 public:
     typedef uint64_t    microseconds;
 
-    constexpr Timebase(unsigned index) :
+    constexpr _Timebase(unsigned index) :
         Timer(index)
     {}
 
@@ -216,8 +245,4 @@ private:
     static void         handler(unsigned index);
 };
 
-
-#define CT16B0  Timer(0)
-#define CT16B1  Timer(1)
-#define CT32B0  Timer(2)
-#define CT32B1  Timer(3)
+#define Timebase        _Timebase(CONFIG_TIMEBASE_TIMER)
