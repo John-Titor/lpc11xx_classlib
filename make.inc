@@ -64,6 +64,11 @@ _SRCDIRS	+= scmrtos/core \
 _INCDIRS	+= scmrtos/core scmrtos/port/cortex/mx-gcc
 endif
 
+# LTO elides this file before we get a chance for the 
+# library dependencies to be seen, so turn LTO off for 
+# it.
+_EXTRA_FLAGS_atomic.cpp	= -fno-lto
+
 # Tools
 CC		 = arm-none-eabi-gcc
 AR		 = arm-none-eabi-ar
@@ -113,7 +118,6 @@ _LDFLAGS	 = $(_ARCH_FLAGS) \
 		   -L$(_LIBDIR) \
 		   -Wl,-Map,$@.map \
 		   --specs=nano.specs \
-		   -latomic \
 		   $(LIBS) \
 		   $(LDFLAGS)
 
@@ -156,12 +160,12 @@ $(filter %.S.o,$(_OBJS)): $(_OBJDIR)%.o: % $(EXTRA_DEPS)
 $(filter %.c.o,$(_OBJS)): $(_OBJDIR)%.o: % $(EXTRA_DEPS)
 	@echo CC $(notdir $@)
 	$(_V)mkdir -p $(dir $@)
-	$(_V)$(CC) -c -o $@ $< $(_COMMON_FLAGS) $(_CFLAGS)
+	$(_V)$(CC) -c -o $@ $< $(_COMMON_FLAGS) $(_CFLAGS) $(_EXTRA_FLAGS_$(notdir $<))
 
 $(filter %.cpp.o,$(_OBJS)): $(_OBJDIR)%.o: % $(EXTRA_DEPS)
 	@echo C++ $(notdir $@)
 	$(_V)mkdir -p $(dir $@)
-	$(_V)$(CC) -c -o $@ $< $(_COMMON_FLAGS) $(_CXXFLAGS)
+	$(_V)$(CC) -c -o $@ $< $(_COMMON_FLAGS) $(_CXXFLAGS) $(_EXTRA_FLAGS_$(notdir $<))
 
 #
 # Utility rules
