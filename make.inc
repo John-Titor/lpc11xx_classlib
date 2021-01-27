@@ -104,6 +104,8 @@ _CXXFLAGS	 = -std=gnu++17 \
 		   -Wno-register \
 		   $(CXXFLAGS)
 
+_ASFLAGS	 = $(_ARCH_FLAGS)
+
 _LDFLAGS	 = $(_ARCH_FLAGS) \
 		   -nostartfiles \
 		   -Wl,-gc-sections \
@@ -120,6 +122,12 @@ _OBJS		 = $(foreach src,$(SRCS),$(_OBJDIR)$(src).o)
 _DEPS		 = $(_OBJS:.o=.d)
 
 SRCS           	+= $(foreach dir,$(_SRCDIRS),$(wildcard $(_LIBDIR)$(dir)/*.cpp) $(wildcard $(_LIBDIR)$(dir)/*.c))
+SRCS           	+= $(foreach dir,					\
+			$(_SRCDIRS),					\
+				$(wildcard $(_LIBDIR)$(dir)/*.cpp) 	\
+		    		$(wildcard $(_LIBDIR)$(dir)/*.c) 	\
+		    		$(wildcard $(_LIBDIR)$(dir)/*.S))	\
+		   $(addprefix $(_LIBDIR),$(_EXTRA_SRCS))
 
 #$(info SRCS $(notdir $(SRCS)))
 #$(info OBJS $(notdir $(_OBJS)))
@@ -140,6 +148,11 @@ upload: $(BIN)
 #
 # Rules for building object files.
 #
+$(filter %.S.o,$(_OBJS)): $(_OBJDIR)%.o: % $(EXTRA_DEPS)
+	@echo ASM $(notdir $@)
+	$(_V)mkdir -p $(dir $@)
+	$(_V)$(CC) -c -o $@ $< $(_ASFLAGS)
+
 $(filter %.c.o,$(_OBJS)): $(_OBJDIR)%.o: % $(EXTRA_DEPS)
 	@echo CC $(notdir $@)
 	$(_V)mkdir -p $(dir $@)

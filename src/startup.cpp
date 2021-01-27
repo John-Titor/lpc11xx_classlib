@@ -36,8 +36,6 @@ extern uint32_t _bss_start;
 extern uint32_t _bss_end;
 extern funcp_t _init_array_start;
 extern funcp_t _init_array_end;
-extern funcp_t _fini_array_start;
-extern funcp_t _fini_array_end;
 
 extern "C" void main() __attribute__((noreturn));
 
@@ -46,18 +44,17 @@ void __attribute__((naked))
 _start()
 {
     // Load .data from rom image.
-    auto rp = &_data_rom;
-    auto wp = &_data_start;
-
-    while (wp < &_data_end) {
-        *wp++ = *rp++;
+    for (auto src = &_data_rom, dst = &_data_start;
+         dst < &_data_end;
+         src++, dst++) {
+        *dst = *src;
     }
 
     // Clear .bss.
-    wp = &_bss_start;
-
-    while (wp < &_bss_end) {
-        *wp++ = 0;
+    for (auto ptr = &_bss_start;
+         ptr < &_bss_end;
+         ptr++) {
+        *ptr = 0;
     }
 
     // Switch to maximum clock speed (be nice to do this earlier...)
@@ -65,17 +62,17 @@ _start()
 
     // Fill the stack with 1s
     register unsigned long sp asm("sp");
-    wp = (uint32_t *)(sp - 16);
-
-    while (wp >= &_bss_end) {
-        *wp-- = 0xffffffff;
+    for (auto ptr = (uint32_t *)(sp - 16); 
+         ptr >= &_bss_end;
+         ptr--) {
+        *ptr = 0xffffffff;
     }
 
     // Call constructors.
-    auto fp = &_init_array_start;
-
-    while (fp < &_init_array_end) {
-        (*fp++)();
+    for (auto fp = &_init_array_start;
+         fp < &_init_array_end;
+         fp++) {
+        (*fp)();
     }
 
     // run the app

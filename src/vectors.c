@@ -32,42 +32,51 @@ extern uint8_t _stacktop;
 // From startup.cpp
 extern void _start(void);
 
-static void _badhandler(void) { for (;;) { LPC_UART->THR = 'X'; } }
+static void _badhandler0(void) { for (;;) { LPC_UART->THR = '0'; } }
+static void _badhandler1(void) { for (;;) { LPC_UART->THR = '1'; } }
+static void _badhandler2(void) { for (;;) { LPC_UART->THR = '2'; } }
+static void _badhandler3(void) { for (;;) { LPC_UART->THR = '3'; } }
+static void _badhandler4(void) { for (;;) { LPC_UART->THR = '4'; } }
+static void _badhandler5(void) { for (;;) { LPC_UART->THR = '5'; } }
+//static void _badhandler6(void) { for (;;) { LPC_UART->THR = '6'; } }
+//static void _badhandler7(void) { for (;;) { LPC_UART->THR = '7'; } }
+//static void _badhandler8(void) { for (;;) { LPC_UART->THR = '8'; } }
+//static void _badhandler9(void) { for (;;) { LPC_UART->THR = '9'; } }
 
-void NonMaskableInt_Handler(void)   __attribute__((weak, alias("_badhandler")));
-void HardFault_Handler(void)        __attribute__((weak, alias("_badhandler")));
-void SVCall_Handler(void)           __attribute__((weak, alias("_badhandler")));
-void PendSV_Handler(void)           __attribute__((weak, alias("_badhandler")));
-void SysTick_Handler(void)          __attribute__((weak, alias("_badhandler")));
-void WAKEUP0_Handler(void)          __attribute__((weak, alias("_badhandler")));
-void WAKEUP1_Handler(void)          __attribute__((weak, alias("_badhandler")));
-void WAKEUP2_Handler(void)          __attribute__((weak, alias("_badhandler")));
-void WAKEUP3_Handler(void)          __attribute__((weak, alias("_badhandler")));
-void WAKEUP4_Handler(void)          __attribute__((weak, alias("_badhandler")));
-void WAKEUP5_Handler(void)          __attribute__((weak, alias("_badhandler")));
-void WAKEUP6_Handler(void)          __attribute__((weak, alias("_badhandler")));
-void WAKEUP7_Handler(void)          __attribute__((weak, alias("_badhandler")));
-void WAKEUP8_Handler(void)          __attribute__((weak, alias("_badhandler")));
-void WAKEUP9_Handler(void)          __attribute__((weak, alias("_badhandler")));
-void WAKEUP10_Handler(void)         __attribute__((weak, alias("_badhandler")));
-void WAKEUP11_Handler(void)         __attribute__((weak, alias("_badhandler")));
-void WAKEUP12_Handler(void)         __attribute__((weak, alias("_badhandler")));
-void CAN_Handler(void)              __attribute__((weak, alias("_badhandler")));
-void SSP1_Handler(void)             __attribute__((weak, alias("_badhandler")));
-void I2C_Handler(void)              __attribute__((weak, alias("_badhandler")));
-void TIMER_16_0_Handler(void)       __attribute__((weak, alias("_badhandler")));
-void TIMER_16_1_Handler(void)       __attribute__((weak, alias("_badhandler")));
-void TIMER_32_0_Handler(void)       __attribute__((weak, alias("_badhandler")));
-void TIMER_32_1_Handler(void)       __attribute__((weak, alias("_badhandler")));
-void SSP0_Handler(void)             __attribute__((weak, alias("_badhandler")));
-void UART_Handler(void)             __attribute__((weak, alias("_badhandler")));
-void ADC_Handler(void)              __attribute__((weak, alias("_badhandler")));
-void WDT_Handler(void)              __attribute__((weak, alias("_badhandler")));
-void BOD_Handler(void)              __attribute__((weak, alias("_badhandler")));
-void EINT3_Handler(void)            __attribute__((weak, alias("_badhandler")));
-void EINT2_Handler(void)            __attribute__((weak, alias("_badhandler")));
-void EINT1_Handler(void)            __attribute__((weak, alias("_badhandler")));
-void EINT0_Handler(void)            __attribute__((weak, alias("_badhandler")));
+void NonMaskableInt_Handler(void)   __attribute__((weak, alias("_badhandler1")));
+void HardFault_Handler(void)        __attribute__((weak, alias("_badhandler2")));
+void SVCall_Handler(void)           __attribute__((weak, alias("_badhandler3")));
+void PendSV_Handler(void)           __attribute__((weak, alias("_badhandler4")));
+void SysTick_Handler(void)          __attribute__((weak, alias("_badhandler5")));
+void WAKEUP0_Handler(void)          __attribute__((weak, alias("_badhandler0")));
+void WAKEUP1_Handler(void)          __attribute__((weak, alias("_badhandler0")));
+void WAKEUP2_Handler(void)          __attribute__((weak, alias("_badhandler0")));
+void WAKEUP3_Handler(void)          __attribute__((weak, alias("_badhandler0")));
+void WAKEUP4_Handler(void)          __attribute__((weak, alias("_badhandler0")));
+void WAKEUP5_Handler(void)          __attribute__((weak, alias("_badhandler0")));
+void WAKEUP6_Handler(void)          __attribute__((weak, alias("_badhandler0")));
+void WAKEUP7_Handler(void)          __attribute__((weak, alias("_badhandler0")));
+void WAKEUP8_Handler(void)          __attribute__((weak, alias("_badhandler0")));
+void WAKEUP9_Handler(void)          __attribute__((weak, alias("_badhandler0")));
+void WAKEUP10_Handler(void)         __attribute__((weak, alias("_badhandler0")));
+void WAKEUP11_Handler(void)         __attribute__((weak, alias("_badhandler0")));
+void WAKEUP12_Handler(void)         __attribute__((weak, alias("_badhandler0")));
+void CAN_Handler(void)              __attribute__((weak, alias("_badhandler0")));
+void SSP1_Handler(void)             __attribute__((weak, alias("_badhandler0")));
+void I2C_Handler(void)              __attribute__((weak, alias("_badhandler0")));
+void TIMER_16_0_Handler(void)       __attribute__((weak, alias("_badhandler0")));
+void TIMER_16_1_Handler(void)       __attribute__((weak, alias("_badhandler0")));
+void TIMER_32_0_Handler(void)       __attribute__((weak, alias("_badhandler0")));
+void TIMER_32_1_Handler(void)       __attribute__((weak, alias("_badhandler0")));
+void SSP0_Handler(void)             __attribute__((weak, alias("_badhandler0")));
+void UART_Handler(void)             __attribute__((weak, alias("_badhandler0")));
+void ADC_Handler(void)              __attribute__((weak, alias("_badhandler0")));
+void WDT_Handler(void)              __attribute__((weak, alias("_badhandler0")));
+void BOD_Handler(void)              __attribute__((weak, alias("_badhandler0")));
+void EINT3_Handler(void)            __attribute__((weak, alias("_badhandler0")));
+void EINT2_Handler(void)            __attribute__((weak, alias("_badhandler0")));
+void EINT1_Handler(void)            __attribute__((weak, alias("_badhandler0")));
+void EINT0_Handler(void)            __attribute__((weak, alias("_badhandler0")));
 
 __attribute__((section(".vectors")))
 void (*_vectors[])() = {

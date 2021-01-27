@@ -16,7 +16,6 @@ SECTIONS {
     } > flash
     
     .text : ALIGN(4) SUBALIGN(4) {
-        *(.text.startup.*)
         *(.text)
         *(.text.*)
         *(.rodata)
