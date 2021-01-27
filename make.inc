@@ -121,7 +121,6 @@ _LDSCRIPT	 = $(_LIBDIR)$(CHIP).ld
 _OBJS		 = $(foreach src,$(SRCS),$(_OBJDIR)$(src).o)
 _DEPS		 = $(_OBJS:.o=.d)
 
-SRCS           	+= $(foreach dir,$(_SRCDIRS),$(wildcard $(_LIBDIR)$(dir)/*.cpp) $(wildcard $(_LIBDIR)$(dir)/*.c))
 SRCS           	+= $(foreach dir,					\
 			$(_SRCDIRS),					\
 				$(wildcard $(_LIBDIR)$(dir)/*.cpp) 	\

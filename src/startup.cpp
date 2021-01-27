@@ -39,6 +39,9 @@ extern funcp_t _init_array_end;
 
 extern "C" void main() __attribute__((noreturn));
 
+extern "C" void _board_init(void) {}
+void board_init(void) __attribute__((weak, alias("_board_init")));
+
 extern "C"
 void __attribute__((naked))
 _start()
@@ -74,6 +77,9 @@ _start()
          fp++) {
         (*fp)();
     }
+
+    // call the board init hook
+    board_init();
 
     // run the app
     main();
