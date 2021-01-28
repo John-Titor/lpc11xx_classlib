@@ -142,8 +142,8 @@ namespace {
                             | (msg.extended ? CAN_MSG_OBJ::EXT : 0)
                             | (msg.rtr ? CAN_MSG_OBJ::RTR : 0)),
                 .mask = 0,
-                .data = { tx_obj.data[0], tx_obj.data[1], tx_obj.data[2], tx_obj.data[3], 
-                          tx_obj.data[4], tx_obj.data[5], tx_obj.data[6], tx_obj.data[7] },
+                .data = { msg.data[0], msg.data[1], msg.data[2], msg.data[3], 
+                          msg.data[4], msg.data[5], msg.data[6], msg.data[7] },
                 .dlc = msg.dlc,
                 .msgobj = msg_obj,
             };
@@ -225,13 +225,13 @@ namespace CAN_ROM
     {
         SYSCON_CAN.clock(true);
 
-        // publish callback table
-        static const CAN_CALLBACKS cbtab = { .CAN_rx = CAN_rx, .CAN_tx = CAN_tx, .CAN_error = CAN_error };
-        rom_table->config_calb(&cbtab);
-
         // set current bitrate and kick off init
         current_bitrate = bitrate;
         CAN_reinit();
+
+        // publish callback table
+        static const CAN_CALLBACKS cbtab = { .CAN_rx = CAN_rx, .CAN_tx = CAN_tx, .CAN_error = CAN_error };
+        rom_table->config_calb(&cbtab);
 
         // set up object 1 as a receiver wildcard
         set_filter(1, 0, 0);
