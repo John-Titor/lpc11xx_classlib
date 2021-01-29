@@ -34,85 +34,37 @@
 #include "interrupt.h"
 #include "syscon.h"
 
-class _UART
+class UART
 {
 public:
-    constexpr _UART(bool polled = false) :
+    constexpr UART(bool polled = false) :
         _polled(polled),
         _irq(UART_IRQ)
     {}
 
-    const _UART &configure(unsigned rate) const;
+    const UART &configure(unsigned rate) const;
 
     __always_inline void send(uint8_t c) const
     {
         if (_polled) {
-            while (!txidle()) {}
+            while (!(LPC_UART->LSR & LSR_TEMT)) {}
             LPC_UART->THR = c;
         } else {
             async_send(c);
         }
     }
 
-    __always_inline bool recv(uint8_t &c) const
-    {
-        return async_recv(c);
-    }
+    void send(char c)                   const { send((uint8_t)c); }
+    void send(const char *s)            const { while (*s != '\0') send(*s++); }
+    void send(const etl::istring &s)    const { for (auto c : s) send(c); }
 
-    __always_inline bool rxready() const { return LPC_UART->LSR & LSR_RDR_DATA; }
-    __always_inline bool txready() const { return LPC_UART->LSR & LSR_THRE; }
-    __always_inline bool txidle()  const { return LPC_UART->LSR & LSR_TEMT; }
+    template<typename T> const UART &operator << (T c) const { send(c); return *this; }
 
+    bool recv(uint8_t &c) const;
+    bool recv(etl::istring &s) const;
 
-    __always_inline const _UART &operator << (uint8_t c) const
-    {
-        send(c);
-        return *this;
-    }
-
-    __always_inline const _UART &operator << (char c) const
-    {
-        send(c);
-        return *this;
-    }
-
-    __always_inline const _UART &operator << (const char *s) const
-    {
-        while (*s != '\0') {
-            send(*s++);
-        }
-
-        return *this;
-    }
-
-    __always_inline const _UART &operator << (const etl::istring s) const
-    {
-        auto iter = s.begin();
-
-        while (iter != s.end()) {
-            send(*iter++);
-        }
-
-        return *this;
-    }
-
-    const _UART &operator << (unsigned val) const
-    {
-        for (int shift = 28; shift >= 0; shift -= 4) {
-            unsigned n = (val >> shift) & 0xf;
-            uint8_t c;
-
-            if (n < 10) {
-                c = '0' + n;
-            } else {
-                c = 'A' + n - 10;
-            }
-
-            send(c);
-        }
-
-        return *this;
-    }
+    size_t recv_available() const;
+    size_t send_space() const;
 
 private:
     friend void UART_Handler(void);
@@ -306,9 +258,8 @@ private:
 
     void            set_divisors(uint32_t rate) const;
     void            async_send(uint8_t c) const;
-    bool            async_recv(uint8_t &c) const;
     void            interrupt(void) const;
 };
 
-#define UART        _UART()
-#define UART_POLLED _UART(true)
+#define UART0           UART()
+#define UART0_POLLED    UART(true)

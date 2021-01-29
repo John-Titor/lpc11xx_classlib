@@ -178,7 +178,7 @@ _uputc(char c)
     if (c == '\n') {
         _uputc('\r');
     }
-    UART << c;
+    UART0.send(c);
 }
 
 extern "C"

@@ -38,8 +38,8 @@ namespace {
                            etl::memory_model::MEMORY_MODEL_SMALL> rx_queue;
 };
 
-const _UART &
-_UART::configure(unsigned rate) const
+const UART &
+UART::configure(unsigned rate) const
 {
     Syscon::set_uart_prescale(1);           // start UART clock & set 1:1 divisor
     LPC_UART->IER = 0;                      // disable interrupts
@@ -61,7 +61,7 @@ _UART::configure(unsigned rate) const
 
 // fractional divider logic from LPCOpen 2.00a
 void
-_UART::set_divisors(uint32_t rate) const
+UART::set_divisors(uint32_t rate) const
 {
     uint32_t dval, mval;
     uint32_t dl;
@@ -106,7 +106,7 @@ _UART::set_divisors(uint32_t rate) const
 }
 
 void
-_UART::async_send(uint8_t c) const
+UART::async_send(uint8_t c) const
 {
     // XXX queue-full case?
     tx_queue.push(c);
@@ -121,13 +121,25 @@ _UART::async_send(uint8_t c) const
 }
 
 bool
-_UART::async_recv(uint8_t &c) const
+UART::recv(uint8_t &c) const
 {
     return rx_queue.pop(c);
 }
 
+size_t
+UART::recv_available() const
+{
+    return rx_queue.size();
+}
+
+size_t
+UART::send_space() const
+{
+    return tx_queue.available();
+}
+
 void
-_UART::interrupt(void) const
+UART::interrupt(void) const
 {
     // receive any available bytes
     while (LPC_UART->LSR & LSR_RDR_DATA) {
@@ -152,5 +164,5 @@ _UART::interrupt(void) const
 void
 UART_Handler(void)
 {
-    UART.interrupt();
+    UART0.interrupt();
 }
