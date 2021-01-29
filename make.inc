@@ -67,7 +67,8 @@ endif
 # LTO elides this file before we get a chance for the 
 # library dependencies to be seen, so turn LTO off for 
 # it.
-_EXTRA_FLAGS_atomic.cpp	= -fno-lto
+_EXTRA_FLAGS_atomic.cpp		= -fno-lto
+_EXTRA_FLAGS_cplusplus.cpp	= -fno-lto
 
 # Tools
 CC		 = arm-none-eabi-gcc
