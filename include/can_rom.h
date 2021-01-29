@@ -26,6 +26,8 @@
 #pragma once
 #ifdef LPC11C24FBD48
 
+#include <stdint.h>
+
 namespace CAN_ROM {
 
     struct Message {
@@ -45,7 +47,8 @@ namespace CAN_ROM {
     };
     void init(Bitrate bitrate);
     bool send(const Message &msg);
-    bool receive(Message &msg);
+    bool recv(Message &msg);
+    bool available();
     bool set_filter(uint8_t filter_index,
                     uint32_t id_bits,
                     uint32_t mask_bits);

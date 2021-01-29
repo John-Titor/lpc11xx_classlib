@@ -259,9 +259,14 @@ namespace CAN_ROM
         return result;
     }
 
-    bool receive(Message &msg)
+    bool recv(Message &msg)
     {
         return rx_queue.pop(msg);
+    }
+
+    bool available()
+    {
+        return !rx_queue.empty();
     }
 
     bool set_filter(uint8_t filter_index,
