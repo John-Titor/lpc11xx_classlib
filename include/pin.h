@@ -131,7 +131,6 @@ public:
     void        toggle() const { _port->MASKED_ACCESS[1 << _pin_number] ^= _pin_mask; }
 
     operator    bool()   const { return get(); }
-    const Gpio &operator    =(bool from) const { set(from); return *this; }
 
     __always_inline void set(bool value) const
     {
@@ -142,16 +141,18 @@ public:
         }
     }
 
-    __always_inline const Gpio &operator << (int i) const
+    template<typename T>
+    __always_inline const Gpio &operator << (T i) const
     {
-        set(i != 0);
+        set(i);
         return * this;
     }
 
-    __always_inline const Gpio &operator << (bool s) const
+    template<typename T>
+    __always_inline const Gpio &operator=(T i) const 
     {
-        set(s);
-        return * this;
+        set(i); 
+        return *this;
     }
 
     __always_inline const Gpio &operator=(const Gpio &from) const
