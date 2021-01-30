@@ -63,8 +63,8 @@ public:
     bool recv(uint8_t &c) const;
     bool recv(etl::istring &s) const;
 
-    size_t recv_available() const;
-    size_t send_space() const;
+    bool recv_available() const;
+    bool send_space() const;
 
 private:
     friend void UART_Handler(void);

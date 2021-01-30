@@ -46,6 +46,10 @@
 #include <syscon.h>
 
 namespace {
+    static const uint8_t    tx_msgobj = 0;
+    static const uint8_t    rx_std_msgobj = 1;
+    static const uint8_t    rx_ext_msgobj = 2;
+
     ////////////////////////////////////////////////////////////////////////////////
     // ROM API
     //
@@ -104,21 +108,24 @@ namespace {
     static void
     CAN_rx(uint8_t msg_obj)
     {
-        // get the received message
-        CAN_MSG_OBJ rx_obj = { .msgobj = msg_obj };
-        rom_table->can_receive(&rx_obj);
+        if ((msg_obj == rx_std_msgobj)
+            || (msg_obj == rx_ext_msgobj)) {
+            // get the received message
+            CAN_MSG_OBJ rx_obj = { .msgobj = msg_obj };
+            rom_table->can_receive(&rx_obj);
 
-        // try to queue it (silent loss if no space)
-        CAN_ROM::Message msg = {
-            // extract 29- or 11-bit ID
-            .id = (rx_obj.mode_id & CAN_MSG_OBJ::EXT) ? (rx_obj.mode_id & 0x1fffffff) : (rx_obj.mode_id & 0x7ff),
-            .extended = (rx_obj.mode_id & CAN_MSG_OBJ::EXT) ? 1U : 0U,
-            .rtr = (rx_obj.mode_id & CAN_MSG_OBJ::RTR) ? 1U : 0U,
-            .dlc = rx_obj.dlc,
-            .data = { rx_obj.data[0], rx_obj.data[1], rx_obj.data[2], rx_obj.data[3], 
-                      rx_obj.data[4], rx_obj.data[5], rx_obj.data[6], rx_obj.data[7] },
-        };
-        rx_queue.push(msg);
+            // try to queue it (silent loss if no space)
+            CAN_ROM::Message msg = {
+                // extract 29- or 11-bit ID
+                .id = (rx_obj.mode_id & CAN_MSG_OBJ::EXT) ? (rx_obj.mode_id & 0x1fffffff) : (rx_obj.mode_id & 0x7ff),
+                .extended = (rx_obj.mode_id & CAN_MSG_OBJ::EXT) ? 1U : 0U,
+                .rtr = (rx_obj.mode_id & CAN_MSG_OBJ::RTR) ? 1U : 0U,
+                .dlc = rx_obj.dlc,
+                .data = { rx_obj.data[0], rx_obj.data[1], rx_obj.data[2], rx_obj.data[3], 
+                          rx_obj.data[4], rx_obj.data[5], rx_obj.data[6], rx_obj.data[7] },
+            };
+            rx_queue.push(msg);
+        }
     }
     
     ////////////////////////////////////////////////////////////////////////////////
@@ -133,23 +140,26 @@ namespace {
     static void
     CAN_tx(uint8_t msg_obj)
     {
-        // if there's another message ready to go, send it
-        CAN_ROM::Message msg;
+        // if there's another message ready to go for slot 1, send it
+        if (msg_obj == tx_msgobj) {
+            CAN_ROM::Message msg;
 
-        if (tx_queue.pop(msg)) {
-            CAN_MSG_OBJ tx_obj = {
-                .mode_id = (msg.id 
-                            | (msg.extended ? CAN_MSG_OBJ::EXT : 0)
-                            | (msg.rtr ? CAN_MSG_OBJ::RTR : 0)),
-                .mask = 0,
-                .data = { msg.data[0], msg.data[1], msg.data[2], msg.data[3], 
-                          msg.data[4], msg.data[5], msg.data[6], msg.data[7] },
-                .dlc = msg.dlc,
-                .msgobj = msg_obj,
-            };
-            rom_table->can_transmit(&tx_obj);
-        } else {
-            tx_in_progress = false;
+            if (tx_queue.pop(msg)) {
+                CAN_MSG_OBJ tx_obj = {
+                    .mode_id = (msg.id 
+                                | (msg.extended ? CAN_MSG_OBJ::EXT : 0)
+                                | (msg.rtr ? CAN_MSG_OBJ::RTR : 0)),
+                    .mask = 0,
+                    .data = { msg.data[0], msg.data[1], msg.data[2], msg.data[3], 
+                              msg.data[4], msg.data[5], msg.data[6], msg.data[7] },
+                    .dlc = msg.dlc,
+                    .msgobj = tx_msgobj,
+                };
+                rom_table->can_transmit(&tx_obj);
+                tx_in_progress = true;
+            } else {
+                tx_in_progress = false;
+            }
         }
     }
 
@@ -233,8 +243,11 @@ namespace CAN_ROM
         static const CAN_CALLBACKS cbtab = { .CAN_rx = CAN_rx, .CAN_tx = CAN_tx, .CAN_error = CAN_error };
         rom_table->config_calb(&cbtab);
 
-        // set up object 1 as a receiver wildcard
-        set_filter(1, 0, 0);
+        // Set up two wildcard receive objects; one for regular and one for
+        // extended messages. This seems to be the only way to receive
+        // everything.
+        set_filter(rx_std_msgobj, 0, CAN_MSG_OBJ::EXT);
+        set_filter(rx_ext_msgobj, CAN_MSG_OBJ::EXT, CAN_MSG_OBJ::EXT);
 
         // enable interrupts (ROM might do this already?)
         CAN_IRQ.enable();
@@ -242,21 +255,22 @@ namespace CAN_ROM
 
     bool send(const Message &msg)
     {
-        auto result = tx_queue.push(msg);
-
+#if 0
         // are we in an error state that will prevent us from transmitting?
         if (error_need_reinit) {
             CAN_reinit();
         }
+#endif
+
+        while (!tx_queue.push(msg)) {
+        }
 
         // is the sender still working on something?
         if (!tx_in_progress) {
-            // reset the in-progress flag and fake a completion callback
-            // for object #1
-            tx_in_progress = true;
-            CAN_tx(1);
+            // fake a tx-done interrupt for object #1
+            CAN_tx(tx_msgobj);
         }
-        return result;
+        return true;
     }
 
     bool recv(Message &msg)
@@ -264,22 +278,30 @@ namespace CAN_ROM
         return rx_queue.pop(msg);
     }
 
-    bool available()
+    bool recv_available()
     {
         return !rx_queue.empty();
+    }
+
+    bool send_space()
+    {
+        return !tx_queue.full();
     }
 
     bool set_filter(uint8_t filter_index,
                     uint32_t id_bits,
                     uint32_t mask_bits)
     {
-        CAN_MSG_OBJ filter = { 
-            .mode_id = id_bits,
-            .mask = mask_bits,
-            .msgobj = filter_index,
-        };
-        rom_table->config_rxmsgobj(&filter);
-        return true;
+        if ((filter_index >= 2) && (filter_index <= 32)) {
+            CAN_MSG_OBJ filter = { 
+                .mode_id = id_bits,
+                .mask = mask_bits,
+                .msgobj = filter_index,
+            };
+            rom_table->config_rxmsgobj(&filter);
+            return true;
+        }
+        return false;
     }
 }
 

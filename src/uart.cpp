@@ -35,7 +35,7 @@ namespace {
 
     etl::queue_spsc_atomic<uint8_t,
                            CONFIG_UART_RX_BUFFER,
-                           etl::memory_model::MEMORY_MODEL_SMALL> rx_queue;
+                           etl::memory_model::MEMORY_MODEL_SMALL> uart_rx_queue;
 };
 
 const UART &
@@ -108,34 +108,36 @@ UART::set_divisors(uint32_t rate) const
 void
 UART::async_send(uint8_t c) const
 {
-    // XXX queue-full case?
-    tx_queue.push(c);
+    while (!tx_queue.push(c)) {
+    }
 
     // If the transmit interrupt is disabled, the transmit path 
-    // is idle. Stuff a byte into the THR and re-enable the THR interrupt.
+    // is idle. Try to get a byte from the queue and if we succeed,
+    // stuff it into the THR & re-enable the interrupt.
     if ((LPC_UART->IER & IER_THRE_Interrupt_MASK) == IER_THRE_Interrupt_Disabled) {
-        tx_queue.pop(c);
-        LPC_UART->THR = c;
-        LPC_UART->IER |= IER_THRE_Interrupt_Enabled;
+        if (tx_queue.pop(c)) {
+            LPC_UART->THR = c;
+            LPC_UART->IER |= IER_THRE_Interrupt_Enabled;
+        }
     }
 }
 
 bool
 UART::recv(uint8_t &c) const
 {
-    return rx_queue.pop(c);
+    return uart_rx_queue.pop(c);
 }
 
-size_t
+bool
 UART::recv_available() const
 {
-    return rx_queue.size();
+    return !uart_rx_queue.empty();
 }
 
-size_t
+bool
 UART::send_space() const
 {
-    return tx_queue.available();
+    return !tx_queue.full();
 }
 
 void
@@ -145,19 +147,20 @@ UART::interrupt(void) const
     while (LPC_UART->LSR & LSR_RDR_DATA) {
         // we're going to drop bytes here; if we wanted
         // to implement flow control we'd want to check
-        // the rx_queue and mask the interrupt...
-        rx_queue.push(LPC_UART->RBR);        
+        // the uart_rx_queue and mask the interrupt...
+        uart_rx_queue.push(LPC_UART->RBR);        
     }
 
     // send any available bytes we have space for
-    uint8_t c;
-    while ((LPC_UART->LSR & LSR_THRE)
-           && (tx_queue.pop(c))) {
-        LPC_UART->THR = c;
-    }
-    // if we've run out of data to send, mask the interrupt
-    if (tx_queue.empty()) {
-        LPC_UART->IER &= ~IER_THRE_Interrupt_Enabled;
+    while (LPC_UART->LSR & LSR_THRE) {
+        uint8_t c;
+        if (tx_queue.pop(c)) {
+            LPC_UART->THR = c;
+        } else {
+            // we've run out of data to send, mask the interrupt
+            LPC_UART->IER &= ~IER_THRE_Interrupt_Enabled;
+            break;
+        }
     }
 }
 
