@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Michael Smith, All Rights Reserved
+// Copyright (c) 2018, 2021 Michael Smith, All Rights Reserved
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
@@ -35,7 +35,7 @@ namespace {
 
     etl::queue_spsc_atomic<uint8_t,
                            CONFIG_UART_RX_BUFFER,
-                           etl::memory_model::MEMORY_MODEL_SMALL> uart_rx_queue;
+                           etl::memory_model::MEMORY_MODEL_SMALL> rx_queue;
 };
 
 const UART &
@@ -63,40 +63,20 @@ UART::configure(unsigned rate) const
 void
 UART::set_divisors(uint32_t rate) const
 {
-    uint32_t dval, mval;
-    uint32_t dl;
+    // divisor calculations from lpcopen_v2_00a
     uint32_t rate16 = 16U * rate;
-
-    /* The fractional is calculated as (PCLK  % (16 * Baudrate)) / (16 * Baudrate)
-     * Let's make it to be the ratio DivVal / MulVal
-     */
-    dval = Syscon::PCLK_FREQ % rate16;
-
-    /* The PCLK / (16 * Baudrate) is fractional
-     * => dval = pclk % rate16
-     * mval = rate16;
-     * now normalize the ratio
-     * dval / mval = 1 / new_mval
-     * new_mval = mval / dval
-     * new_dval = 1
-     */
+    uint32_t dval = Syscon::PCLK_FREQ % rate16;
+    uint32_t mval = 0;
     if (dval > 0) {
         mval = rate16 / dval;
         dval = 1;
-
-        /* In case mval still bigger then 4 bits
-        * no adjustment require
-        */
         if (mval > 12) {
             dval = 0;
         }
-    } else {
-        mval = 0;
     }
-
     dval &= 0xf;
     mval &= 0xf;
-    dl = Syscon::PCLK_FREQ / (rate16 + rate16 * dval / mval);
+    uint32_t dl = Syscon::PCLK_FREQ / (rate16 + rate16 * dval / mval);
 
     LPC_UART->LCR |= LCR_Divisor_Latch_Access_Enabled;
     LPC_UART->DLL = dl & 0xff;
@@ -125,13 +105,13 @@ UART::async_send(uint8_t c) const
 bool
 UART::recv(uint8_t &c) const
 {
-    return uart_rx_queue.pop(c);
+    return rx_queue.pop(c);
 }
 
 bool
 UART::recv_available() const
 {
-    return !uart_rx_queue.empty();
+    return !rx_queue.empty();
 }
 
 bool
@@ -147,8 +127,8 @@ UART::interrupt(void) const
     while (LPC_UART->LSR & LSR_RDR_DATA) {
         // we're going to drop bytes here; if we wanted
         // to implement flow control we'd want to check
-        // the uart_rx_queue and mask the interrupt...
-        uart_rx_queue.push(LPC_UART->RBR);        
+        // the rx_queue and mask the interrupt...
+        rx_queue.push(LPC_UART->RBR);        
     }
 
     // send any available bytes we have space for

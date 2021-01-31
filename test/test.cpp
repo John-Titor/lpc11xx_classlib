@@ -17,8 +17,9 @@ callback(void)
 void
 main0()
 {
-    Timebase(0).configure();
+    Timebase.configure();
 
+#if 0
     // SSP
     P0_9_MOSI0.configure();
     SSP0.configure(2400000, 8, 0);
@@ -41,15 +42,15 @@ main0()
     P0_2.clear();
     P0_2 = false;
     P0_2 = !P0_2;
-
+#endif
     // print some stuff
     P1_7_TXD.configure();
     P1_6_RXD.configure();
-    UART.configure(115200);
+    UART0.configure(115200);
 
-    UART << 'X' << "test string";
+    UART0 << 'X' << "test string";
     for (;;) {
-        UART.send('A');
+        UART0.send('A');
         P0_2.toggle();
     }
 }

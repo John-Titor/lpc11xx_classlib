@@ -25,6 +25,11 @@
 //
 
 // Atomic primitives; should be supplied by the toolchain, but...
+//
+// Note that due to the way LTO is implemented by both GCC and clang,
+// this file cannot be LTO'ed, as the symbol references it serves to
+// satisfy don't exist until codegen and it will be eliminated before
+// then as nothing in here is called by anything else.
 
 #include <interrupt.h>
 
