@@ -28,14 +28,15 @@
 
 #include "uart.h"
 
-namespace {
-    etl::queue_spsc_atomic<uint8_t,
-                           CONFIG_UART_TX_BUFFER,
-                           etl::memory_model::MEMORY_MODEL_SMALL> tx_queue;
+namespace
+{
+etl::queue_spsc_atomic<uint8_t,
+    CONFIG_UART_TX_BUFFER,
+    etl::memory_model::MEMORY_MODEL_SMALL> tx_queue;
 
-    etl::queue_spsc_atomic<uint8_t,
-                           CONFIG_UART_RX_BUFFER,
-                           etl::memory_model::MEMORY_MODEL_SMALL> rx_queue;
+etl::queue_spsc_atomic<uint8_t,
+    CONFIG_UART_RX_BUFFER,
+    etl::memory_model::MEMORY_MODEL_SMALL> rx_queue;
 };
 
 const UART &
@@ -67,13 +68,16 @@ UART::set_divisors(uint32_t rate) const
     uint32_t rate16 = 16U * rate;
     uint32_t dval = Syscon::PCLK_FREQ % rate16;
     uint32_t mval = 0;
+
     if (dval > 0) {
         mval = rate16 / dval;
         dval = 1;
+
         if (mval > 12) {
             dval = 0;
         }
     }
+
     dval &= 0xf;
     mval &= 0xf;
     uint32_t dl = Syscon::PCLK_FREQ / (rate16 + rate16 * dval / mval);
@@ -91,7 +95,7 @@ UART::async_send(uint8_t c) const
     while (!tx_queue.push(c)) {
     }
 
-    // If the transmit interrupt is disabled, the transmit path 
+    // If the transmit interrupt is disabled, the transmit path
     // is idle. Try to get a byte from the queue and if we succeed,
     // stuff it into the THR & re-enable the interrupt.
     if ((LPC_UART->IER & IER_THRE_Interrupt_MASK) == IER_THRE_Interrupt_Disabled) {
@@ -128,12 +132,13 @@ UART::interrupt(void) const
         // we're going to drop bytes here; if we wanted
         // to implement flow control we'd want to check
         // the rx_queue and mask the interrupt...
-        rx_queue.push(LPC_UART->RBR);        
+        rx_queue.push(LPC_UART->RBR);
     }
 
     // send any available bytes we have space for
     while (LPC_UART->LSR & LSR_THRE) {
         uint8_t c;
+
         if (tx_queue.pop(c)) {
             LPC_UART->THR = c;
         } else {

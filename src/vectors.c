@@ -80,7 +80,7 @@ void EINT0_Handler(void)            __attribute__((weak, alias("_badhandler0")))
 
 __attribute__((section(".vectors")))
 void (*_vectors[])() = {
-    [0]                         = (void (*)())&_stacktop,
+    [0]                         = (void (*)()) &_stacktop,
     [1]                         = _start,
     [16 + NonMaskableInt_IRQn]  = NonMaskableInt_Handler,
     [16 + HardFault_IRQn]       = HardFault_Handler,

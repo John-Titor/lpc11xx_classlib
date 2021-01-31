@@ -42,13 +42,14 @@ I2C::transfer(uint8_t slave,
 {
     // claim ownership of the interface
     auto expected = false;
+
     if (!_busy.compare_exchange_strong(expected, true)) {
         return ERROR;
     }
 
     _state = IDLE;
     _slave = slave;
-    
+
     _writeBuffer = etl::array_view<unsigned char>(writeBuffer, writeLength);
     _writeIter = _writeBuffer.begin();
 

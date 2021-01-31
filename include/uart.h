@@ -48,6 +48,7 @@ public:
     {
         if (_polled) {
             while (!(LPC_UART->LSR & LSR_TEMT)) {}
+
             LPC_UART->THR = c;
         } else {
             async_send(c);

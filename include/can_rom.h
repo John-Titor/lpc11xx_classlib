@@ -28,31 +28,32 @@
 
 #include <stdint.h>
 
-namespace CAN_ROM {
+namespace CAN_ROM
+{
 
-    struct Message {
-        uint32_t    id:29;
-        uint32_t    extended:1;
-        uint32_t    rtr:1;
-        uint8_t     dlc;
-        uint8_t     data[8];
-    };
+struct Message {
+    uint32_t    id: 29;
+    uint32_t    extended: 1;
+    uint32_t    rtr: 1;
+    uint8_t     dlc;
+    uint8_t     data[8];
+};
 
-    enum Bitrate {
-        BR_100000,
-        BR_125000,
-        BR_250000,
-        BR_500000,
-        BR_1000000
-    };
-    void init(Bitrate bitrate);
-    bool send(const Message &msg);
-    bool recv(Message &msg);
-    bool recv_available();
-    bool send_space();
-    bool set_filter(uint8_t filter_index,
-                    uint32_t id_bits,
-                    uint32_t mask_bits);
+enum Bitrate {
+    BR_100000,
+    BR_125000,
+    BR_250000,
+    BR_500000,
+    BR_1000000
+};
+void init(Bitrate bitrate);
+bool send(const Message &msg);
+bool recv(Message &msg);
+bool recv_available();
+bool send_space();
+bool set_filter(uint8_t filter_index,
+                uint32_t id_bits,
+                uint32_t mask_bits);
 };
 
 #endif // LPC11C24FBD48

@@ -49,15 +49,15 @@ _start()
 {
     // Load .data from rom image.
     for (auto src = &_data_rom, dst = &_data_start;
-         dst < &_data_end;
-         src++, dst++) {
+            dst < &_data_end;
+            src++, dst++) {
         *dst = *src;
     }
 
     // Clear .bss.
     for (auto ptr = &_bss_start;
-         ptr < &_bss_end;
-         ptr++) {
+            ptr < &_bss_end;
+            ptr++) {
         *ptr = 0;
     }
 
@@ -66,16 +66,17 @@ _start()
 
     // Fill the stack with 1s
     register unsigned long sp asm("sp");
-    for (auto ptr = (uint32_t *)(sp - 16); 
-         ptr >= &_bss_end;
-         ptr--) {
+
+    for (auto ptr = (uint32_t *)(sp - 16);
+            ptr >= &_bss_end;
+            ptr--) {
         *ptr = 0xffffffff;
     }
 
     // Call constructors.
     for (auto fp = &_init_array_start;
-         fp < &_init_array_end;
-         fp++) {
+            fp < &_init_array_end;
+            fp++) {
         (*fp)();
     }
 

@@ -27,38 +27,40 @@
 #include <interrupt.h>
 #include <etl.h>
 
-namespace ETL {
+namespace ETL
+{
 
-	void
-	init(void)
-	{
-		// configure SysTick for 1ms interval tick.
-		SysTick_Config(CONFIG_CPU_FREQUENCY / 1000);
+void
+init(void)
+{
+    // configure SysTick for 1ms interval tick.
+    SysTick_Config(CONFIG_CPU_FREQUENCY / 1000);
 
 #if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
-		callback_timer.enable(true);
+    callback_timer.enable(true);
 #endif
 
-	}
+}
 
-	void
-	millisecond_tick()
-	{
+void
+millisecond_tick()
+{
 #if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
-		static uint32_t callback_ticks_elapsed = 0;
+    static uint32_t callback_ticks_elapsed = 0;
 
-		if (callback_timer.tick(++callback_ticks_elapsed)) {
-			callback_ticks_elapsed = 0;
-		}
+    if (callback_timer.tick(++callback_ticks_elapsed)) {
+        callback_ticks_elapsed = 0;
+    }
+
 #endif
-	}
+}
 
-	////////////////////////////////////////////////////////////////////////////////
-	// callback timers
-	//
-	#if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
-	etl::callback_timer<CONFIG_ETL_NUM_CALLBACK_TIMERS>	callback_timer;
-	#endif // CONFIG_ETL_NUM_CALLBACK_TIMERS
+////////////////////////////////////////////////////////////////////////////////
+// callback timers
+//
+#if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
+etl::callback_timer<CONFIG_ETL_NUM_CALLBACK_TIMERS> callback_timer;
+#endif // CONFIG_ETL_NUM_CALLBACK_TIMERS
 
 
 };
@@ -71,5 +73,5 @@ void
 SysTick_Handler()
 #endif
 {
-	ETL::millisecond_tick();
+    ETL::millisecond_tick();
 }

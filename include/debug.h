@@ -28,4 +28,4 @@
 // debug tracing
 #include <stdio.h>
 
-#define debug(fmt, args...)		fprintf(stderr, fmt "\n", ##args)
+#define debug(fmt, args...)     fprintf(stderr, fmt "\n", ##args)

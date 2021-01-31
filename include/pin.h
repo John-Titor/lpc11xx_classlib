@@ -76,7 +76,8 @@ public:
         _loc_val(loc_val)
     {}
 
-    Pin &configure(uint32_t modifier = 0) {
+    Pin &configure(uint32_t modifier = 0)
+    {
         if (_loc_reg) {
             *_loc_reg = _loc_val;
         }
@@ -112,12 +113,11 @@ public:
         _pin_mask(1U << _pin_number)
     {}
 
-    Gpio &configure(Direction_t direction, uint32_t modifier = 0) {
-        if (direction == Output)
-        {
+    Gpio &configure(Direction_t direction, uint32_t modifier = 0)
+    {
+        if (direction == Output) {
             _port->DIR |= _pin_mask;
-        } else
-        {
+        } else {
             _port->DIR &= ~_pin_mask;
         }
 
@@ -149,9 +149,9 @@ public:
     }
 
     template<typename T>
-    __always_inline const Gpio &operator=(T i) const 
+    __always_inline const Gpio &operator=(T i) const
     {
-        set(i); 
+        set(i);
         return *this;
     }
 

@@ -91,6 +91,7 @@ int _isatty(int file)
     case 1:
     case 2:
         return 1;
+
     default:
         errno = EBADF;
         return 0;
@@ -178,6 +179,7 @@ _uputc(char c)
     if (c == '\n') {
         _uputc('\r');
     }
+
     UART0.send(c);
 }
 
@@ -185,8 +187,10 @@ extern "C"
 int _write(int file, char *ptr, int len)
 {
     int resid = len;
+
     while (resid--) {
         _uputc(*ptr++);
     }
+
     return len;
 }

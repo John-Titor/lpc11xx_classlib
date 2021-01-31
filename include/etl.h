@@ -32,12 +32,13 @@
 
 #include <etl/callback_timer.h>
 
-namespace ETL {
+namespace ETL
+{
 
-	void init(void);
+void init(void);
 
-	#if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
-	extern etl::callback_timer<CONFIG_ETL_NUM_CALLBACK_TIMERS>	callback_timer;
-	#endif
+#if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
+extern etl::callback_timer<CONFIG_ETL_NUM_CALLBACK_TIMERS>  callback_timer;
+#endif
 
 };

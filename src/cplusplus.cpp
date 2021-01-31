@@ -29,7 +29,7 @@
 #include <stdlib.h>
 
 void operator
-delete(void *ptr, unsigned int count)
+delete (void *ptr, unsigned int count)
 {
-	free(ptr);
+    free(ptr);
 }

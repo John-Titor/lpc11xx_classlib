@@ -39,7 +39,7 @@
     typedef OS::process<OS::pr ## _n , scmRTOS_PROC ## _n ##_STACKSIZE> TProc ## _n;    \
     [[noreturn]] extern void main ## _n();                                                \
     namespace OS {                                                                      \
-        template<> OS_PROCESS void TProc ## _n ::exec() { main ## _n (); }              \
+    template<> OS_PROCESS void TProc ## _n ::exec() { main ## _n (); }              \
     } struct hack
 
 #ifndef scmRTOS_PROC0_STACKSIZE
@@ -96,7 +96,7 @@ PROCESS_DEF(6)
 PROCESS_DEF(7)
 #endif
 
-int 
+int
 main()
 {
     OS::run();
@@ -115,8 +115,9 @@ extern "C" void __systick_hook()
 {
 }
 
-namespace OS {
-    void idle_process_user_hook() __attribute__((weak, alias("__idle_hook")));
-    void system_timer_user_hook() __attribute__((weak, alias("__systick_hook")));
+namespace OS
+{
+void idle_process_user_hook() __attribute__((weak, alias("__idle_hook")));
+void system_timer_user_hook() __attribute__((weak, alias("__systick_hook")));
 }
 #endif
