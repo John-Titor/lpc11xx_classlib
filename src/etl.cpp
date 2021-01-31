@@ -63,8 +63,13 @@ namespace ETL {
 
 };
 
+#ifdef WITH_SCMRTOS
+void
+system_timer_user_hook()
+#else
 void
 SysTick_Handler()
+#endif
 {
 	ETL::millisecond_tick();
 }

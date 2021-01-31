@@ -58,6 +58,7 @@ _INCDIRS	 = include \
 
 ifneq ($(findstring scmRTOS_PROCESS_COUNT,$(DEFINES)),)
 $(info WITH_SCMRTOS)
+DEFINES		+= WITH_SCMRTOS
 _SRCDIRS	+= scmrtos/core \
 		   scmrtos/ext \
 		   scmrtos/port/cortex/mx-gcc
