@@ -33,8 +33,10 @@ namespace ETL
 void
 init(void)
 {
+#ifndef WITH_SCMRTOS
     // configure SysTick for 1ms interval tick.
     SysTick_Config(CONFIG_CPU_FREQUENCY / 1000);
+#endif
 
 #if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
     callback_timer.enable(true);
@@ -65,13 +67,10 @@ etl::callback_timer<CONFIG_ETL_NUM_CALLBACK_TIMERS> callback_timer;
 
 };
 
-#ifdef WITH_SCMRTOS
-void
-system_timer_user_hook()
-#else
+#ifndef WITH_SCMRTOS
 void
 SysTick_Handler()
-#endif
 {
     ETL::millisecond_tick();
 }
+#endif

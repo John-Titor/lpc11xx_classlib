@@ -28,6 +28,7 @@
 
 #include <sys/cdefs.h>
 #include <scmRTOS.h>
+#include <etl.h>
 
 #include <LPC11xx.h>
 
@@ -118,6 +119,6 @@ extern "C" void __systick_hook()
 namespace OS
 {
 void idle_process_user_hook() __attribute__((weak, alias("__idle_hook")));
-void system_timer_user_hook() __attribute__((weak, alias("__systick_hook")));
+void system_timer_user_hook() { ETL::millisecond_tick(); }
 }
 #endif

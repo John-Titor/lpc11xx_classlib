@@ -36,6 +36,7 @@ namespace ETL
 {
 
 void init(void);
+void millisecond_tick();
 
 #if CONFIG_ETL_NUM_CALLBACK_TIMERS > 0
 extern etl::callback_timer<CONFIG_ETL_NUM_CALLBACK_TIMERS>  callback_timer;
