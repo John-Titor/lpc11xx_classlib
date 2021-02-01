@@ -118,7 +118,7 @@ CAN_rx(uint8_t msg_obj)
             .id = (rx_obj.mode_id & CAN_MSG_OBJ::EXT) ? (rx_obj.mode_id & 0x1fffffff) : (rx_obj.mode_id & 0x7ff),
             .extended = (rx_obj.mode_id & CAN_MSG_OBJ::EXT) ? 1U : 0U,
             .rtr = (rx_obj.mode_id & CAN_MSG_OBJ::RTR) ? 1U : 0U,
-            .dlc = rx_obj.dlc,
+            .dlc = (rx_obj.dlc < 8) ? rx_obj.dlc : (uint8_t)8,
             .data = {
                 rx_obj.data[0], rx_obj.data[1], rx_obj.data[2], rx_obj.data[3],
                 rx_obj.data[4], rx_obj.data[5], rx_obj.data[6], rx_obj.data[7]

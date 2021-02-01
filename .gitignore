@@ -2,3 +2,4 @@
 *.d
 obj
 .DS_Store
+*.sublime-workspace
