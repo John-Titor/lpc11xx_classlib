@@ -50,7 +50,6 @@ void init(Bitrate bitrate);
 bool send(const Message &msg);
 bool recv(Message &msg);
 bool recv_available();
-bool send_space();
 bool set_filter(uint8_t filter_index,
                 uint32_t id_bits,
                 uint32_t mask_bits);

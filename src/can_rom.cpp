@@ -129,40 +129,13 @@ CAN_rx(uint8_t msg_obj)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// transmit callback & buffering
+// transmit callback
 //
-
-etl::queue_spsc_atomic<CAN_ROM::Message,
-    CONFIG_CAN_TX_QUEUE_SIZE,
-    etl::memory_model::MEMORY_MODEL_SMALL>   tx_queue;
-etl::atomic<bool> tx_in_progress;
 
 static void
 CAN_tx(uint8_t msg_obj)
 {
-    // if there's another message ready to go for slot 1, send it
-    if (msg_obj == tx_msgobj) {
-        CAN_ROM::Message msg;
-
-        if (tx_queue.pop(msg)) {
-            CAN_MSG_OBJ tx_obj = {
-                .mode_id = (msg.id
-                            | (msg.extended ? CAN_MSG_OBJ::EXT : 0)
-                            | (msg.rtr ? CAN_MSG_OBJ::RTR : 0)),
-                .mask = 0,
-                .data = {
-                    msg.data[0], msg.data[1], msg.data[2], msg.data[3],
-                    msg.data[4], msg.data[5], msg.data[6], msg.data[7]
-                },
-                .dlc = msg.dlc,
-                .msgobj = tx_msgobj,
-            };
-            rom_table->can_transmit(&tx_obj);
-            tx_in_progress = true;
-        } else {
-            tx_in_progress = false;
-        }
-    }
+    // don't care
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -217,10 +190,6 @@ CAN_reinit()
     // Note: We might have been trying to send a message, and we have probably
     // lost it if so.
 
-    // cancel any in-progress transmissions
-    tx_in_progress = false;
-    tx_queue.clear();
-
     // clear any need-reset indication from the error callback
     error_need_reinit = false;
 
@@ -266,14 +235,19 @@ bool send(const Message &msg)
 
 #endif
 
-    while (!tx_queue.push(msg)) {
-    }
-
-    // is the sender still working on something?
-    if (!tx_in_progress) {
-        // fake a tx-done interrupt for object #1
-        CAN_tx(tx_msgobj);
-    }
+    CAN_MSG_OBJ tx_obj = {
+        .mode_id = (msg.id
+                    | (msg.extended ? CAN_MSG_OBJ::EXT : 0)
+                    | (msg.rtr ? CAN_MSG_OBJ::RTR : 0)),
+        .mask = 0,
+        .data = {
+            msg.data[0], msg.data[1], msg.data[2], msg.data[3],
+            msg.data[4], msg.data[5], msg.data[6], msg.data[7]
+        },
+        .dlc = msg.dlc,
+        .msgobj = tx_msgobj,
+    };
+    rom_table->can_transmit(&tx_obj);
 
     return true;
 }
@@ -286,11 +260,6 @@ bool recv(Message &msg)
 bool recv_available()
 {
     return !rx_queue.empty();
-}
-
-bool send_space()
-{
-    return !tx_queue.full();
 }
 
 bool set_filter(uint8_t filter_index,
