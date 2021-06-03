@@ -47,9 +47,9 @@
 
 namespace
 {
-static const uint8_t    tx_msgobj = 0;
-static const uint8_t    rx_std_msgobj = 1;
-static const uint8_t    rx_ext_msgobj = 2;
+static const uint8_t    tx_msgobj = 2;
+static const uint8_t    rx_std_msgobj = 4;
+static const uint8_t    rx_ext_msgobj = 5;
 
 ////////////////////////////////////////////////////////////////////////////////
 // ROM API
@@ -106,8 +106,8 @@ etl::queue_spsc_atomic<CAN_ROM::Message,
 static void
 CAN_rx(uint8_t msg_obj)
 {
-    if ((msg_obj == rx_std_msgobj)
-            || (msg_obj == rx_ext_msgobj)) {
+    if ((msg_obj == rx_std_msgobj) ||
+        (msg_obj == rx_ext_msgobj)) {
         // get the received message
         CAN_MSG_OBJ rx_obj = { .msgobj = msg_obj };
         rom_table->can_receive(&rx_obj);
@@ -217,7 +217,7 @@ init(Bitrate bitrate)
     // Set up two wildcard receive objects; one for regular and one for
     // extended messages. This seems to be the only way to receive
     // everything.
-    set_filter(rx_std_msgobj, 0, CAN_MSG_OBJ::EXT);
+    set_filter(rx_std_msgobj, CAN_MSG_OBJ::STD, CAN_MSG_OBJ::EXT);
     set_filter(rx_ext_msgobj, CAN_MSG_OBJ::EXT, CAN_MSG_OBJ::EXT);
 
     // enable interrupts (ROM might do this already?)
